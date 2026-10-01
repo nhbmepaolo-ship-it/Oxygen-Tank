@@ -1,4 +1,4 @@
-import { INITIAL_RECORDS } from '../src/data/initialRecords';
+import { INITIAL_EMPLOYEES } from '../src/data/initialEmployees';
 
 export default function handler(req: any, res: any) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -11,16 +11,16 @@ export default function handler(req: any, res: any) {
 
   try {
     if (req.method === 'GET') {
-      return res.status(200).json(INITIAL_RECORDS || []);
+      return res.status(200).json(INITIAL_EMPLOYEES || []);
     }
 
     if (req.method === 'POST') {
-      return res.status(200).json({ success: true, count: req.body?.length || 0 });
+      return res.status(200).json({ success: true });
     }
 
     return res.status(405).json({ error: 'Method not allowed' });
   } catch (err: any) {
-    console.error('Error in /api/records handler:', err);
-    return res.status(200).json(INITIAL_RECORDS || []);
+    console.error('Error in /api/employees handler:', err);
+    return res.status(200).json(INITIAL_EMPLOYEES || []);
   }
 }
