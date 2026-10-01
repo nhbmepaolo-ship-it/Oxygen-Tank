@@ -192,20 +192,22 @@ export const EmployeeManagement: React.FC<EmployeeManagementProps> = ({
   };
 
   return (
-    <div className="space-y-5 pb-12">
+    <div className="space-y-6 pb-12">
       {/* Top Banner & Action */}
-      <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-white/80 backdrop-blur-xl p-6 rounded-3xl border border-slate-200/80 shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-lg font-bold text-slate-900 flex items-center space-x-2">
-            <Users className="w-5 h-5 text-teal-600" />
+          <h2 className="text-lg sm:text-xl font-black text-slate-900 flex items-center space-x-2.5">
+            <span className="p-2.5 rounded-2xl bg-gradient-to-tr from-teal-500 to-cyan-600 text-white shadow-md shadow-teal-500/20">
+              <Users className="w-5 h-5" />
+            </span>
             <span>ฐานข้อมูลพนักงาน (BME & พนักงานรับส่งผู้ป่วย)</span>
           </h2>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <p className="text-xs text-slate-500 mt-1">
             ข้อมูลพนักงาน 19 ท่าน พร้อมระบบแยกสถานะกำลังปฏิบัติงานและลาออก
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2.5">
           {currentUser.isLoggedIn && (
             <button
               onClick={() => {
@@ -218,7 +220,7 @@ export const EmployeeManagement: React.FC<EmployeeManagementProps> = ({
                 setSelfPassword('');
                 setIsProfileModalOpen(true);
               }}
-              className="px-3 py-2 text-xs font-semibold text-teal-800 bg-teal-50 hover:bg-teal-100 border border-teal-200 rounded-xl transition-colors flex items-center space-x-1.5"
+              className="px-4 py-2.5 text-xs font-bold text-teal-800 bg-teal-50 hover:bg-teal-100 border border-teal-200 rounded-2xl transition-all shadow-xs flex items-center space-x-1.5"
             >
               <Key className="w-4 h-4 text-teal-600" />
               <span>อัพเดตข้อมูลส่วนตัวของฉัน</span>
@@ -228,7 +230,7 @@ export const EmployeeManagement: React.FC<EmployeeManagementProps> = ({
           {canManage && (
             <button
               onClick={() => setIsAddModalOpen(true)}
-              className="px-3.5 py-2 text-xs font-semibold text-white bg-teal-600 hover:bg-teal-700 rounded-xl shadow-xs transition-colors flex items-center space-x-1.5"
+              className="px-4 py-2.5 text-xs font-bold text-white bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 rounded-2xl shadow-md shadow-teal-500/20 transition-all flex items-center space-x-1.5 transform active:scale-95"
             >
               <UserPlus className="w-4 h-4" />
               <span>เพิ่มพนักงานใหม่</span>
@@ -240,12 +242,12 @@ export const EmployeeManagement: React.FC<EmployeeManagementProps> = ({
       {/* Tabs & Search */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         {/* Tab switch */}
-        <div className="flex items-center space-x-1 p-1 bg-slate-100 rounded-xl text-xs font-semibold">
+        <div className="flex items-center space-x-1 p-1 bg-slate-100/90 rounded-2xl text-xs font-bold border border-slate-200/60">
           <button
             onClick={() => setActiveTab('active')}
-            className={`px-4 py-2 rounded-lg transition-colors flex items-center space-x-1.5 ${
+            className={`px-4 py-2 rounded-xl transition-all flex items-center space-x-1.5 ${
               activeTab === 'active'
-                ? 'bg-white text-emerald-800 shadow-xs'
+                ? 'bg-white text-emerald-800 shadow-sm'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
@@ -255,9 +257,9 @@ export const EmployeeManagement: React.FC<EmployeeManagementProps> = ({
 
           <button
             onClick={() => setActiveTab('resigned')}
-            className={`px-4 py-2 rounded-lg transition-colors flex items-center space-x-1.5 ${
+            className={`px-4 py-2 rounded-xl transition-all flex items-center space-x-1.5 ${
               activeTab === 'resigned'
-                ? 'bg-white text-rose-800 shadow-xs'
+                ? 'bg-white text-rose-800 shadow-sm'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >

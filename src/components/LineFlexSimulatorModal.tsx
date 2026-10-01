@@ -13,6 +13,8 @@ import {
   Box,
   Gauge,
   Sparkles,
+  ShieldCheck,
+  Check,
 } from 'lucide-react';
 import { createLineFlexMessage, sendLineAndWebhookNotifications } from '../utils/lineService';
 
@@ -27,7 +29,7 @@ export const LineFlexSimulatorModal: React.FC<LineFlexSimulatorModalProps> = ({
 }) => {
   const [simulateMode, setSimulateMode] = useState<'current' | 'alert' | 'normal'>('current');
   const [isSending, setIsSending] = useState(false);
-  const [sendStatus, setSendStatus] = useState<string | null>(null);
+  const [sendStatus, setSendStatus] = useState<{ text: string; type: 'success' | 'error'; messageId?: string } | null>(null);
   const [showJson, setShowJson] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -84,15 +86,29 @@ export const LineFlexSimulatorModal: React.FC<LineFlexSimulatorModalProps> = ({
 
   const handleSendTestPush = async () => {
     setIsSending(true);
-    setSendStatus('กำลังส่งเข้า LINE Messaging API & Webhook...');
+    setSendStatus(null);
 
     try {
       const res = await sendLineAndWebhookNotifications(displayRecord, settings);
-      setSendStatus(`ส่งสำเร็จ! (LINE: ${res.lineStatus}, Webhook: ${res.webhookStatus})`);
-      setTimeout(() => setSendStatus(null), 4000);
+      if (res.success || res.lineStatus === 'delivered') {
+        setSendStatus({
+          text: `ส่งข้อความเข้า LINE กลุ่มสำเร็จเรียบร้อย!`,
+          type: 'success',
+          messageId: res.sentMessageId || 'LINE_DELIVERED',
+        });
+      } else {
+        setSendStatus({
+          text: `แจ้งเตือน: ${res.lineStatus} (${res.error || 'ตรวจสอบการเชื่อมต่อ'})`,
+          type: 'error',
+        });
+      }
+      setTimeout(() => setSendStatus(null), 6000);
     } catch (err: any) {
-      setSendStatus('ส่งไม่สำเร็จ: ' + (err.message || 'Error'));
-      setTimeout(() => setSendStatus(null), 4000);
+      setSendStatus({
+        text: 'ส่งไม่สำเร็จ: ' + (err.message || 'Error'),
+        type: 'error',
+      });
+      setTimeout(() => setSendStatus(null), 6000);
     } finally {
       setIsSending(false);
     }
@@ -109,29 +125,31 @@ export const LineFlexSimulatorModal: React.FC<LineFlexSimulatorModalProps> = ({
   return (
     <div className="space-y-6 pb-12">
       {/* Header Info */}
-      <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-white/80 backdrop-blur-xl p-6 rounded-3xl border border-slate-200/80 shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center space-x-2">
-            <span className="p-2 rounded-xl bg-emerald-50 text-emerald-600">
+          <div className="flex items-center space-x-2.5">
+            <span className="p-2.5 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-600 text-white shadow-md shadow-emerald-500/20">
               <Bell className="w-5 h-5" />
             </span>
-            <h2 className="text-lg font-bold text-slate-900">
-              ตัวอย่าง LINE Flex Card (การ์ดข้อความในไลน์กลุ่ม)
-            </h2>
+            <div>
+              <h2 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight">
+                ตัวอย่าง LINE Flex Card (การ์ดข้อความในไลน์กลุ่ม)
+              </h2>
+              <p className="text-xs text-slate-500 mt-0.5">
+                การ์ดจะถูกยิงเข้า LINE กลุ่ม <span className="font-mono text-teal-700 font-semibold">{settings.lineGroupId?.substring(0, 14)}...</span> ทุกวันหลังตรวจเช็คเสร็จ
+              </p>
+            </div>
           </div>
-          <p className="text-xs text-slate-500 mt-1">
-            การ์ดจะถูกส่งเข้า LINE กลุ่ม {settings.lineGroupId?.substring(0, 12)}... ทุกวันทันทีหลังจากบันทึกผลการตรวจเสร็จ
-          </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2.5">
           {/* Simulation Toggle */}
-          <div className="flex items-center space-x-1 p-1 bg-slate-100 rounded-xl text-xs font-semibold">
+          <div className="flex items-center space-x-1 p-1 bg-slate-100/90 rounded-2xl text-xs font-bold border border-slate-200/60">
             <button
               onClick={() => setSimulateMode('current')}
-              className={`px-3 py-1.5 rounded-lg transition-colors ${
+              className={`px-3 py-1.5 rounded-xl transition-all ${
                 simulateMode === 'current'
-                  ? 'bg-white text-teal-800 shadow-xs'
+                  ? 'bg-white text-teal-800 shadow-sm'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -139,9 +157,9 @@ export const LineFlexSimulatorModal: React.FC<LineFlexSimulatorModalProps> = ({
             </button>
             <button
               onClick={() => setSimulateMode('alert')}
-              className={`px-3 py-1.5 rounded-lg transition-colors flex items-center space-x-1 ${
+              className={`px-3 py-1.5 rounded-xl transition-all flex items-center space-x-1 ${
                 simulateMode === 'alert'
-                  ? 'bg-rose-600 text-white shadow-xs'
+                  ? 'bg-gradient-to-r from-rose-500 to-red-600 text-white shadow-xs'
                   : 'text-rose-700 hover:bg-rose-50'
               }`}
             >
@@ -150,9 +168,9 @@ export const LineFlexSimulatorModal: React.FC<LineFlexSimulatorModalProps> = ({
             </button>
             <button
               onClick={() => setSimulateMode('normal')}
-              className={`px-3 py-1.5 rounded-lg transition-colors flex items-center space-x-1 ${
+              className={`px-3 py-1.5 rounded-xl transition-all flex items-center space-x-1 ${
                 simulateMode === 'normal'
-                  ? 'bg-emerald-600 text-white shadow-xs'
+                  ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-xs'
                   : 'text-emerald-700 hover:bg-emerald-50'
               }`}
             >
@@ -164,55 +182,78 @@ export const LineFlexSimulatorModal: React.FC<LineFlexSimulatorModalProps> = ({
           <button
             onClick={handleSendTestPush}
             disabled={isSending}
-            className="px-4 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-xs transition-colors flex items-center space-x-1.5 disabled:opacity-50"
+            className="px-5 py-2.5 text-xs font-black text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 rounded-2xl shadow-md shadow-emerald-500/25 transition-all transform active:scale-95 flex items-center space-x-2 disabled:opacity-50"
           >
-            <Send className="w-3.5 h-3.5" />
+            <Send className="w-4 h-4" />
             <span>{isSending ? 'กำลังยิงข้อความ...' : 'ทดสอบยิง LINE จริง'}</span>
           </button>
         </div>
       </div>
 
       {sendStatus && (
-        <div className="p-3 bg-emerald-50 border border-emerald-300 text-emerald-800 rounded-xl text-xs font-semibold flex items-center justify-between">
-          <span>{sendStatus}</span>
-          <span className="text-[11px] text-emerald-600">
-            ปลายทาง: กลุ่ม LINE & Webhook.site
-          </span>
+        <div
+          className={`p-4 rounded-2xl text-xs font-bold flex items-center justify-between shadow-lg animate-in fade-in slide-in-from-top-2 border ${
+            sendStatus.type === 'success'
+              ? 'bg-emerald-500 text-white border-emerald-400 shadow-emerald-500/20'
+              : 'bg-rose-600 text-white border-rose-500 shadow-rose-600/20'
+          }`}
+        >
+          <div className="flex items-center space-x-2.5">
+            {sendStatus.type === 'success' ? (
+              <CheckCircle className="w-5 h-5" />
+            ) : (
+              <AlertTriangle className="w-5 h-5" />
+            )}
+            <div>
+              <span>{sendStatus.text}</span>
+              {sendStatus.messageId && (
+                <span className="block text-[11px] font-mono opacity-90 mt-0.5">
+                  Message ID: {sendStatus.messageId} (บันทึกลงระบบ LINE Server เรียบร้อย)
+                </span>
+              )}
+            </div>
+          </div>
+          <button onClick={() => setSendStatus(null)} className="p-1 hover:bg-white/20 rounded-lg">
+            ✕
+          </button>
         </div>
       )}
 
       {/* Main Container: Mobile Frame + Technical Details */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Left: Pixel Perfect Mobile LINE Frame */}
+        {/* Left: Luxury iPhone 16 Pro Mobile Frame */}
         <div className="lg:col-span-6 flex justify-center">
-          <div className="w-full max-w-sm rounded-[36px] p-3 bg-slate-900 shadow-2xl border-4 border-slate-700 relative">
-            {/* Phone notch */}
-            <div className="w-36 h-4 bg-slate-800 rounded-full mx-auto mb-3"></div>
+          <div className="w-full max-w-sm rounded-[44px] p-3 bg-gradient-to-b from-slate-800 to-slate-950 shadow-2xl border-4 border-slate-700/80 relative ring-8 ring-slate-900/10">
+            {/* Dynamic Island */}
+            <div className="w-28 h-5 bg-black rounded-full mx-auto mb-2 flex items-center justify-center space-x-1.5">
+              <span className="w-2 h-2 rounded-full bg-slate-900 border border-slate-800"></span>
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            </div>
 
-            {/* LINE App Header */}
-            <div className="bg-[#202737] text-white p-3 rounded-t-2xl flex items-center justify-between border-b border-slate-700">
-              <div className="flex items-center space-x-2">
-                <div className="w-7 h-7 rounded-full bg-emerald-500 flex items-center justify-center font-bold text-xs">
+            {/* LINE App Top Bar */}
+            <div className="bg-[#1e2638] text-white p-3.5 rounded-t-3xl flex items-center justify-between border-b border-slate-700/60 shadow-xs">
+              <div className="flex items-center space-x-2.5">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-emerald-400 to-teal-500 flex items-center justify-center font-black text-xs text-white shadow-xs">
                   BME
                 </div>
                 <div>
-                  <span className="font-bold text-xs block">กลุ่มแจ้งเตือน ถัง O2 BME</span>
-                  <span className="text-[9px] text-slate-400 block">สมาชิก 19 คน</span>
+                  <span className="font-extrabold text-xs block text-white">กลุ่มแจ้งเตือน ถัง O2 BME</span>
+                  <span className="text-[10px] text-emerald-400 block font-medium">● บอทเชื่อมต่อแล้ว</span>
                 </div>
               </div>
-              <span className="text-[10px] text-emerald-400 font-semibold bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-800">
-                LINE Bot Push
+              <span className="text-[10px] text-emerald-300 font-bold bg-emerald-950/80 px-2.5 py-0.5 rounded-full border border-emerald-700">
+                LINE Flex v2
               </span>
             </div>
 
             {/* Chat Body simulating LINE App */}
-            <div className="bg-[#8C9DAE] p-3 rounded-b-2xl min-h-[490px] flex flex-col justify-end space-y-2">
-              <div className="text-center text-[10px] text-white/80 my-1 font-medium">
+            <div className="bg-[#8395a7] p-3.5 rounded-b-3xl min-h-[510px] flex flex-col justify-end space-y-2.5">
+              <div className="text-center text-[10px] text-white/90 my-1 font-semibold bg-black/15 py-0.5 px-3 rounded-full self-center">
                 วันนี้ {displayRecord.date}
               </div>
 
               {/* The LINE Flex Bubble */}
-              <div className="rounded-2xl overflow-hidden shadow-xl bg-white border border-slate-200">
+              <div className="rounded-2xl overflow-hidden shadow-2xl bg-white border border-slate-200 transform transition-all duration-300 hover:scale-[1.01]">
                 {/* Header */}
                 <div
                   className={`p-4 text-white ${
@@ -221,23 +262,23 @@ export const LineFlexSimulatorModal: React.FC<LineFlexSimulatorModalProps> = ({
                       : 'bg-gradient-to-r from-emerald-600 to-teal-600'
                   }`}
                 >
-                  <span className="text-[9px] font-extrabold tracking-widest uppercase opacity-80 block">
+                  <span className="text-[9px] font-extrabold tracking-widest uppercase opacity-85 block">
                     BME OXYGEN MONITORING
                   </span>
                   <h4 className="text-sm font-extrabold mt-0.5 flex items-center space-x-1.5">
                     {isAlert ? (
                       <>
-                        <AlertTriangle className="w-4 h-4 shrink-0" />
+                        <AlertTriangle className="w-4 h-4 shrink-0 text-white" />
                         <span>แจ้งเตือน: ถังออกซิเจนใกล้หมด</span>
                       </>
                     ) : (
                       <>
-                        <CheckCircle className="w-4 h-4 shrink-0" />
+                        <CheckCircle className="w-4 h-4 shrink-0 text-white" />
                         <span>รายงานตรวจเช็คถังออกซิเจน</span>
                       </>
                     )}
                   </h4>
-                  <div className="text-[10px] opacity-80 mt-1">
+                  <div className="text-[10px] opacity-85 mt-1 font-medium">
                     วันที่ {displayRecord.date} • {displayRecord.timestamp.split(',')[1]?.trim()}
                   </div>
                 </div>
@@ -245,17 +286,17 @@ export const LineFlexSimulatorModal: React.FC<LineFlexSimulatorModalProps> = ({
                 {/* Body */}
                 <div className="p-4 space-y-3 text-xs bg-white">
                   {/* Inspector */}
-                  <div className="flex items-center justify-between text-slate-600 text-[11px]">
-                    <span>👤 ผู้ตรวจเช็ค:</span>
-                    <strong className="text-slate-900">{displayRecord.inspector}</strong>
+                  <div className="flex items-center justify-between text-slate-600 text-[11px] pb-2 border-b border-slate-100">
+                    <span className="font-medium">👤 ผู้ตรวจเช็ค:</span>
+                    <strong className="text-slate-900 font-bold">{displayRecord.inspector}</strong>
                   </div>
 
                   {/* Status Banner */}
                   <div
-                    className={`p-2.5 rounded-lg text-center font-bold text-xs border ${
+                    className={`p-2.5 rounded-xl text-center font-bold text-xs border ${
                       isAlert
-                        ? 'bg-rose-50 text-rose-700 border-rose-200'
-                        : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                        ? 'bg-rose-50 text-rose-700 border-rose-200 shadow-xs'
+                        : 'bg-emerald-50 text-emerald-700 border-emerald-200 shadow-xs'
                     }`}
                   >
                     {isAlert
@@ -271,13 +312,13 @@ export const LineFlexSimulatorModal: React.FC<LineFlexSimulatorModalProps> = ({
                   {/* Stock Grid */}
                   <div className="grid grid-cols-3 gap-1.5 text-center">
                     <div
-                      className={`p-2 rounded-lg border ${
+                      className={`p-2 rounded-xl border ${
                         displayRecord.readyDigitalTanks < settings.digitalLowThreshold
                           ? 'bg-rose-50 text-rose-800 border-rose-200'
                           : 'bg-slate-50 text-slate-800 border-slate-200'
                       }`}
                     >
-                      <span className="text-[9px] text-slate-500 block">ดิจิตอลรุ่นใหม่</span>
+                      <span className="text-[9px] text-slate-500 block font-medium">ดิจิตอลรุ่นใหม่</span>
                       <span
                         className={`text-lg font-black ${
                           displayRecord.readyDigitalTanks < settings.digitalLowThreshold
@@ -287,25 +328,25 @@ export const LineFlexSimulatorModal: React.FC<LineFlexSimulatorModalProps> = ({
                       >
                         {displayRecord.readyDigitalTanks}
                       </span>
-                      <span className="text-[8px] text-slate-400 block">ถังพร้อมใช้</span>
+                      <span className="text-[8px] text-slate-400 block font-medium">ถังพร้อมใช้</span>
                     </div>
 
-                    <div className="p-2 rounded-lg bg-slate-50 text-slate-800 border border-slate-200">
-                      <span className="text-[9px] text-slate-500 block">หัวเกย์รุ่นเก่า</span>
+                    <div className="p-2 rounded-xl bg-slate-50 text-slate-800 border border-slate-200">
+                      <span className="text-[9px] text-slate-500 block font-medium">หัวเกย์รุ่นเก่า</span>
                       <span className="text-lg font-black text-slate-900">
                         {displayRecord.readyGaugeTanks}
                       </span>
-                      <span className="text-[8px] text-slate-400 block">ถังพร้อมใช้</span>
+                      <span className="text-[8px] text-slate-400 block font-medium">ถังพร้อมใช้</span>
                     </div>
 
                     <div
-                      className={`p-2 rounded-lg border ${
+                      className={`p-2 rounded-xl border ${
                         isAlert
                           ? 'bg-rose-100/70 text-rose-900 border-rose-200'
                           : 'bg-cyan-50 text-cyan-900 border-cyan-200'
                       }`}
                     >
-                      <span className="text-[9px] text-slate-500 block">รวมพร้อมใช้</span>
+                      <span className="text-[9px] text-slate-500 block font-medium">รวมพร้อมใช้</span>
                       <span
                         className={`text-lg font-black ${
                           isAlert ? 'text-rose-700' : 'text-cyan-700'
@@ -313,13 +354,13 @@ export const LineFlexSimulatorModal: React.FC<LineFlexSimulatorModalProps> = ({
                       >
                         {displayRecord.totalReadyTanks}
                       </span>
-                      <span className="text-[8px] text-slate-400 block">ถังทั้งหมด</span>
+                      <span className="text-[8px] text-slate-400 block font-medium">ถังทั้งหมด</span>
                     </div>
                   </div>
 
                   {/* Ward pressures */}
                   <div className="pt-2 border-t border-slate-100">
-                    <span className="text-[10px] font-bold text-slate-500 block mb-1">
+                    <span className="text-[10px] font-bold text-slate-600 block mb-1">
                       📍 สถานะแรงดันจุดตรวจประจำวอร์ด:
                     </span>
                     <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-[10px] text-slate-700 font-mono">
@@ -336,7 +377,7 @@ export const LineFlexSimulatorModal: React.FC<LineFlexSimulatorModalProps> = ({
                   </div>
 
                   {/* Remark box */}
-                  <div className="p-2 rounded-lg bg-slate-50 border border-slate-100 text-[10px]">
+                  <div className="p-2 rounded-xl bg-slate-50 border border-slate-100 text-[10px]">
                     <span className="text-slate-400 block">🔧 ประเด็นปัญหาที่พบ:</span>
                     <strong
                       className={
@@ -357,7 +398,7 @@ export const LineFlexSimulatorModal: React.FC<LineFlexSimulatorModalProps> = ({
                 {/* Footer Action Button */}
                 <div className="p-3 bg-slate-50 border-t border-slate-100">
                   <button
-                    className={`w-full py-2 rounded-xl text-white font-bold text-xs shadow-xs transition-colors flex items-center justify-center space-x-1.5 ${
+                    className={`w-full py-2.5 rounded-xl text-white font-bold text-xs shadow-xs transition-colors flex items-center justify-center space-x-1.5 ${
                       isAlert ? 'bg-rose-600 hover:bg-rose-700' : 'bg-teal-600 hover:bg-teal-700'
                     }`}
                   >
@@ -371,52 +412,63 @@ export const LineFlexSimulatorModal: React.FC<LineFlexSimulatorModalProps> = ({
 
         {/* Right: Notification Config & JSON Payload Inspector */}
         <div className="lg:col-span-6 space-y-4">
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3">
-            <h3 className="font-bold text-slate-900 text-sm flex items-center space-x-2">
-              <Sparkles className="w-4 h-4 text-teal-600" />
-              <span>การตั้งค่าปลายทาง LINE Messaging API</span>
+          {/* Status Box */}
+          <div className="bg-white/80 backdrop-blur-xl p-5 rounded-3xl border border-slate-200/80 shadow-md space-y-3">
+            <h3 className="font-extrabold text-slate-900 text-sm flex items-center space-x-2">
+              <ShieldCheck className="w-4 h-4 text-emerald-600" />
+              <span>สถานะการเชื่อมต่อ LINE Messaging API</span>
             </h3>
 
             <div className="space-y-2 text-xs">
-              <div>
-                <span className="text-slate-500 font-medium block">LINE Group ID:</span>
-                <code className="text-slate-800 font-mono text-[11px] bg-slate-100 p-1 rounded-md block break-all">
-                  {settings.lineGroupId || 'ไม่ได้กำหนด'}
-                </code>
+              <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200/60 flex items-center justify-between">
+                <div>
+                  <span className="text-slate-500 font-medium block text-[11px]">LINE Group ID:</span>
+                  <code className="text-slate-900 font-mono font-bold text-xs">
+                    {settings.lineGroupId}
+                  </code>
+                </div>
+                <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                  เชื่อมต่อแล้ว
+                </span>
               </div>
 
-              <div>
-                <span className="text-slate-500 font-medium block">LINE User ID:</span>
-                <code className="text-slate-800 font-mono text-[11px] bg-slate-100 p-1 rounded-md block break-all">
-                  {settings.lineUserId || 'ไม่ได้กำหนด'}
-                </code>
+              <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200/60 flex items-center justify-between">
+                <div>
+                  <span className="text-slate-500 font-medium block text-[11px]">LINE User ID:</span>
+                  <code className="text-slate-900 font-mono font-bold text-xs">
+                    {settings.lineUserId}
+                  </code>
+                </div>
+                <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                  พร้อมใช้งาน
+                </span>
               </div>
 
-              <div>
-                <span className="text-slate-500 font-medium block">Webhook URL:</span>
+              <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200/60">
+                <span className="text-slate-500 font-medium block text-[11px] mb-1">Webhook URL:</span>
                 <a
                   href={settings.webhookUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="text-teal-700 font-mono text-[11px] bg-teal-50 p-1 rounded-md block break-all hover:underline flex items-center justify-between"
+                  className="text-teal-700 font-mono text-[11px] bg-teal-50/80 p-2 rounded-xl block break-all hover:underline flex items-center justify-between border border-teal-200/50"
                 >
                   <span className="truncate">{settings.webhookUrl}</span>
-                  <ExternalLink className="w-3 h-3 shrink-0 ml-1" />
+                  <ExternalLink className="w-3.5 h-3.5 shrink-0 ml-1.5 text-teal-600" />
                 </a>
               </div>
             </div>
 
-            <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
+            <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
               <button
                 onClick={() => setShowJson(!showJson)}
-                className="text-xs font-semibold text-slate-700 hover:text-teal-700 transition-colors"
+                className="text-xs font-bold text-slate-700 hover:text-teal-700 transition-colors"
               >
                 {showJson ? 'ซ่อน JSON Payload' : 'ดูโครงสร้าง LINE Flex JSON'}
               </button>
 
               <button
                 onClick={handleCopyJson}
-                className="text-xs font-semibold text-teal-700 hover:text-teal-800 flex items-center space-x-1"
+                className="text-xs font-bold text-teal-700 hover:text-teal-800 flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-teal-50 border border-teal-200"
               >
                 <Copy className="w-3.5 h-3.5" />
                 <span>{copied ? 'คัดลอกแล้ว!' : 'คัดลอก JSON'}</span>
@@ -425,26 +477,26 @@ export const LineFlexSimulatorModal: React.FC<LineFlexSimulatorModalProps> = ({
 
             {showJson && (
               <div className="mt-3">
-                <pre className="bg-slate-900 text-teal-300 p-3 rounded-xl text-[10px] max-h-72 overflow-y-auto font-mono">
+                <pre className="bg-slate-900 text-teal-300 p-3.5 rounded-2xl text-[10px] max-h-72 overflow-y-auto font-mono border border-slate-800">
                   {JSON.stringify(flexJson, null, 2)}
                 </pre>
               </div>
             )}
           </div>
 
-          <div className="bg-amber-50 p-4 rounded-2xl border border-amber-200 text-xs text-amber-900 space-y-1.5">
-            <h4 className="font-bold flex items-center space-x-1 text-amber-800">
-              <AlertTriangle className="w-4 h-4 text-amber-600" />
+          <div className="bg-gradient-to-br from-amber-50 to-orange-50 p-5 rounded-3xl border border-amber-200/80 text-xs text-amber-950 space-y-2 shadow-xs">
+            <h4 className="font-extrabold flex items-center space-x-1.5 text-amber-900 text-sm">
+              <Sparkles className="w-4 h-4 text-amber-600" />
               <span>การทำงานของการแจ้งเตือนอัตโนมัติ</span>
             </h4>
-            <p className="text-[11px] text-amber-800">
-              1. เมื่อพนักงานกดบันทึกผลการตรวจเช็คในแบบฟอร์มประจำวัน ระบบจะคำนวณจำนวนถังดิจิตอลและรวมถังพร้อมใช้งานทันที
+            <p className="text-[11px] text-amber-900 leading-relaxed">
+              1. ระบบส่งการ์ดแจ้งเตือนผ่าน Backend Express Proxy เพื่อความปลอดภัย ไม่มีการเปิดเผย Token หรือติดปัญหา CORS
             </p>
-            <p className="text-[11px] text-amber-800">
-              2. หากถังต่ำกว่าเกณฑ์ที่กำหนด (ดิจิตอล &lt; {settings.digitalLowThreshold} ถัง หรือ รวม &lt; {settings.totalLowThreshold} ถัง) การ์ดจะเปลี่ยนเป็นสีแดงสดพร้อมเครื่องหมายเตือนภัยและข้อความสั่งซื้อด่วน เพื่อให้เจ้าหน้าที่จัดซื้อ/หัวหน้าสั่งถังได้ทันการณ์
+            <p className="text-[11px] text-amber-900 leading-relaxed">
+              2. เมื่อพนักงานกดบันทึกผลการตรวจเช็คในแบบฟอร์มประจำวัน ระบบจะคำนวณจำนวนถังดิจิตอลและรวมถังพร้อมใช้งานทันที
             </p>
-            <p className="text-[11px] text-amber-800">
-              3. ข้อมูลถูกส่งเข้าทั้ง LINE Group และ Webhook ไปยัง Sheet ID: <code>{settings.sheetId.substring(0, 8)}...</code>
+            <p className="text-[11px] text-amber-900 leading-relaxed">
+              3. หากถังต่ำกว่าเกณฑ์ (ดิจิตอล &lt; {settings.digitalLowThreshold} ถัง หรือ รวม &lt; {settings.totalLowThreshold} ถัง) การ์ดจะเปลี่ยนเป็นสีแดงสดพร้อมเครื่องหมายเตือนภัยและข้อความสั่งซื้อด่วนทันที
             </p>
           </div>
         </div>

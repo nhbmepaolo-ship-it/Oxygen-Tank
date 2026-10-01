@@ -9,6 +9,7 @@ import {
   saveSettings,
   loadCurrentUser,
   saveCurrentUser,
+  resetToInitialRecords,
   DEFAULT_GUEST_USER,
 } from './utils/storage';
 import { Navbar } from './components/Navbar';
@@ -23,10 +24,10 @@ import { exportToExcel, exportToPDF } from './utils/exportUtils';
 import { CheckCircle2, AlertTriangle, X } from 'lucide-react';
 
 export default function App() {
-  const [currentUser, setCurrentUser] = useState<CurrentUser>(DEFAULT_GUEST_USER);
-  const [records, setRecords] = useState<InspectionRecord[]>([]);
-  const [employees, setEmployees] = useState<Employee[]>([]);
-  const [settings, setSettings] = useState<SystemSettings>(loadSettings());
+  const [currentUser, setCurrentUser] = useState<CurrentUser>(() => loadCurrentUser());
+  const [records, setRecords] = useState<InspectionRecord[]>(() => loadRecords());
+  const [employees, setEmployees] = useState<Employee[]>(() => loadEmployees());
+  const [settings, setSettings] = useState<SystemSettings>(() => loadSettings());
 
   const [activeTab, setActiveTab] = useState<string>('dashboard');
 
@@ -38,25 +39,26 @@ export default function App() {
   // Toast banner
   const [toastMessage, setToastMessage] = useState<{ text: string; type: 'success' | 'alert' } | null>(null);
 
+  // Reset helper
+  const handleResetData = () => {
+    const fresh = resetToInitialRecords();
+    setRecords(fresh);
+    showToast('โหลดข้อมูลประวัติทั้งหมด 274 รายการเรียบร้อยแล้ว', 'success');
+  };
+
   // Initialize data from local storage / server
   useEffect(() => {
-    const savedUser = loadCurrentUser();
-    setCurrentUser(savedUser);
-
-    const savedRecords = loadRecords();
-    setRecords(savedRecords);
-
-    const savedEmps = loadEmployees();
-    setEmployees(savedEmps);
-
-    const savedSettings = loadSettings();
-    setSettings(savedSettings);
+    // If records are empty or too low, immediately load full initial dataset
+    if (records.length < 200) {
+      const fresh = resetToInitialRecords();
+      setRecords(fresh);
+    }
 
     // Fetch from server if available
     fetch('/api/records')
       .then((res) => (res.ok ? res.json() : null))
       .then((serverRecords) => {
-        if (Array.isArray(serverRecords) && serverRecords.length > 0) {
+        if (Array.isArray(serverRecords) && serverRecords.length >= 200) {
           setRecords(serverRecords);
           saveRecords(serverRecords);
         }
@@ -100,6 +102,13 @@ export default function App() {
   const isAdminOrHead = currentUser.role === 'admin' || currentUser.role === 'head';
   const canRecord = !isGuest;
   const canEdit = isAdminOrHead;
+
+  // Enforce Guest menu restrictions: Guest only sees Dashboard, Records, Employees
+  useEffect(() => {
+    if (isGuest && (activeTab === 'line-preview' || activeTab === 'settings')) {
+      setActiveTab('dashboard');
+    }
+  }, [isGuest, activeTab]);
 
   // Record Handlers
   const handleSaveRecord = (record: InspectionRecord) => {
@@ -193,15 +202,17 @@ export default function App() {
 
       {/* Guest Mode Notice Banner */}
       {isGuest && (
-        <div className="bg-amber-500 text-amber-950 py-2 px-4 text-xs font-semibold text-center border-b border-amber-600 flex items-center justify-center space-x-2">
+        <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-slate-300 py-2.5 px-4 text-xs font-medium text-center border-b border-slate-700/60 shadow-xs flex items-center justify-center space-x-2">
+          <span className="inline-block w-2 h-2 rounded-full bg-teal-400"></span>
           <span>
-            ℹ️ คุณกำลังใช้งานในโหมดบุคคลทั่วไป (ดูข้อมูลเท่านั้น) หากต้องการบันทึกการตรวจเช็คหรือแก้ไขข้อมูล
+            โหมดบุคคลทั่วไป: ดูเฉพาะ <strong className="text-white">แดชบอร์ดสรุป</strong>, <strong className="text-white">ประวัติการตรวจเช็ค</strong>, และ <strong className="text-white">ข้อมูลพนักงาน</strong>
           </span>
+          <span className="text-slate-500">•</span>
           <button
             onClick={() => setIsLoginOpen(true)}
-            className="underline font-bold hover:text-black"
+            className="text-teal-400 hover:text-teal-300 underline font-bold transition-colors cursor-pointer"
           >
-            คลิกที่นี่เพื่อเข้าสู่ระบบ
+            เข้าสู่ระบบสำหรับเจ้าหน้าที่
           </button>
         </div>
       )}
@@ -223,6 +234,7 @@ export default function App() {
             canRecord={canRecord}
             onExportExcel={() => exportToExcel(records)}
             onExportPDF={() => exportToPDF(records)}
+            onResetData={handleResetData}
           />
         )}
 
@@ -248,6 +260,7 @@ export default function App() {
             onPreviewLine={(rec) => {
               setActiveTab('line-preview');
             }}
+            onResetData={handleResetData}
           />
         )}
 

@@ -2,9 +2,22 @@ import express from 'express';
 import { createServer as createViteServer } from 'vite';
 import path from 'path';
 import fs from 'fs';
+import { INITIAL_RECORDS } from './src/data/initialRecords';
+import { INITIAL_EMPLOYEES } from './src/data/initialEmployees';
 
 const app = express();
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
+
+// Enable CORS for all incoming requests
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  next();
+});
 
 app.use(express.json({ limit: '10mb' }));
 
@@ -20,12 +33,20 @@ const storePath = path.resolve(dataDir, 'serverStore.json');
 function getStore() {
   try {
     if (fs.existsSync(storePath)) {
-      return JSON.parse(fs.readFileSync(storePath, 'utf-8'));
+      const parsed = JSON.parse(fs.readFileSync(storePath, 'utf-8'));
+      if (parsed && Array.isArray(parsed.records) && parsed.records.length >= INITIAL_RECORDS.length) {
+        return parsed;
+      }
     }
   } catch (e) {
     console.error('Error reading serverStore:', e);
   }
-  return { records: null, employees: null, settings: null };
+  // Initialize with initial records and employees
+  const initialData = { records: INITIAL_RECORDS, employees: INITIAL_EMPLOYEES, settings: null };
+  try {
+    fs.writeFileSync(storePath, JSON.stringify(initialData, null, 2), 'utf-8');
+  } catch (err) {}
+  return initialData;
 }
 
 // Write store helper
@@ -82,39 +103,41 @@ app.post('/api/line/notify', async (req, res) => {
   const { record, flexMessage, settings } = req.body;
   let lineStatus = 'pending';
   let webhookStatus = 'pending';
+  let lineDetails: any = null;
+  let sentMessageId: string | null = null;
 
   // 1. Dispatch to Webhook URL (user provided: https://webhook.site/7a150790-aaf4-4ba2-ba66-4731f6d1b91a)
   try {
     const webhookUrl = settings?.webhookUrl || 'https://webhook.site/7a150790-aaf4-4ba2-ba66-4731f6d1b91a';
-    if (webhookUrl) {
-      await fetch(webhookUrl, {
+    if (webhookUrl && webhookUrl.startsWith('http')) {
+      const webhookResp = await fetch(webhookUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           event: 'OXYGEN_CHECK_SUBMITTED',
-          timestamp: record.timestamp,
-          date: record.date,
-          inspector: record.inspector,
-          readyDigitalTanks: record.readyDigitalTanks,
-          readyGaugeTanks: record.readyGaugeTanks,
-          totalReadyTanks: record.totalReadyTanks,
-          isLowStock: record.isLowStock,
-          issues: record.issues,
+          timestamp: record?.timestamp || new Date().toISOString(),
+          date: record?.date || new Date().toLocaleDateString('th-TH'),
+          inspector: record?.inspector || 'ระบบ',
+          readyDigitalTanks: record?.readyDigitalTanks,
+          readyGaugeTanks: record?.readyGaugeTanks,
+          totalReadyTanks: record?.totalReadyTanks,
+          isLowStock: record?.isLowStock,
+          issues: record?.issues,
           stations: {
-            ward4_9: record.ward4_9,
-            ward4_8_ari: record.ward4_8_ari,
-            building4_7_pt: record.building4_7_pt,
-            ward4_6: record.ward4_6,
-            building4_3_opd: record.building4_3_opd,
-            building4_2_icu: record.building4_2_icu,
-            building4_1_storage: record.building4_1_storage,
+            ward4_9: record?.ward4_9,
+            ward4_8_ari: record?.ward4_8_ari,
+            building4_7_pt: record?.building4_7_pt,
+            ward4_6: record?.ward4_6,
+            building4_3_opd: record?.building4_3_opd,
+            building4_2_icu: record?.building4_2_icu,
+            building4_1_storage: record?.building4_1_storage,
           },
-          lineGroupId: settings?.groupId,
-          lineUserId: settings?.userId,
+          lineGroupId: settings?.groupId || 'C0d56d86a30886df48499737f53e60b28',
+          lineUserId: settings?.userId || 'Ub95fbfe9db3b57c45039abe293c42453',
           flexMessage,
         }),
       });
-      webhookStatus = 'delivered';
+      webhookStatus = webhookResp.ok ? 'delivered' : `http_${webhookResp.status}`;
     }
   } catch (err: any) {
     console.error('Webhook dispatch error:', err.message);
@@ -123,12 +146,24 @@ app.post('/api/line/notify', async (req, res) => {
 
   // 2. Dispatch to LINE Messaging API
   try {
-    const token =
+    const token = (
       settings?.lineChannelAccessToken ||
-      '9muhzHMwL5AOje0lzuZKLIGvGJw72u72aFa2itjTUt9rDwPnyADBA+gTv/5YhH6v0s7vRKBNPaCGY+z+aUlPwM0CcZP0sci5T4EdSQORmTK8B4KPevTWCwYgyTrKEVmrwmSihd3GF4YSgeEzWlayGAdB04t89/1O/w1cDnyilFU=';
+      '9muhzHMwL5AOje0lzuZKLIGvGJw72u72aFa2itjTUt9rDwPnyADBA+gTv/5YhH6v0s7vRKBNPaCGY+z+aUlPwM0CcZP0sci5T4EdSQORmTK8B4KPevTWCwYgyTrKEVmrwmSihd3GF4YSgeEzWlayGAdB04t89/1O/w1cDnyilFU='
+    ).trim();
 
-    const targets = [settings?.groupId, settings?.userId].filter(Boolean);
+    const targets = [
+      settings?.groupId || 'C0d56d86a30886df48499737f53e60b28',
+      settings?.userId || 'Ub95fbfe9db3b57c45039abe293c42453',
+    ].filter(Boolean);
+
+    // Prepare LINE message payload
+    const messageToSend = flexMessage || {
+      type: 'text',
+      text: `🏥 แจ้งเตือนตรวจเช็คถังออกซิเจน BME: ผู้ตรวจ ${record?.inspector || 'เจ้าหน้าที่'} วันที่ ${record?.date || ''} คงเหลือ ${record?.totalReadyTanks || 0} ถัง`,
+    };
+
     for (const target of targets) {
+      console.log(`[LINE] Pushing message to target: ${target}`);
       const lineResp = await fetch('https://api.line.me/v2/bot/message/push', {
         method: 'POST',
         headers: {
@@ -137,25 +172,38 @@ app.post('/api/line/notify', async (req, res) => {
         },
         body: JSON.stringify({
           to: target,
-          messages: [flexMessage],
+          messages: [messageToSend],
         }),
       });
 
-      if (!lineResp.ok) {
-        const errText = await lineResp.text();
-        console.warn(`LINE Push to ${target} status ${lineResp.status}:`, errText);
+      const lineBody = await lineResp.text();
+      console.log(`[LINE Response] status=${lineResp.status}, body=${lineBody}`);
+
+      if (lineResp.ok) {
+        try {
+          const parsed = JSON.parse(lineBody);
+          sentMessageId = parsed.sentMessages?.[0]?.id || 'delivered';
+          lineStatus = 'delivered';
+          lineDetails = parsed;
+        } catch {
+          lineStatus = 'delivered';
+        }
+      } else {
+        lineStatus = `error_${lineResp.status}`;
+        lineDetails = lineBody;
       }
     }
-    lineStatus = 'delivered';
   } catch (err: any) {
     console.error('LINE push error:', err.message);
     lineStatus = 'error: ' + err.message;
   }
 
   res.json({
-    success: true,
+    success: lineStatus === 'delivered' || webhookStatus === 'delivered',
     lineStatus,
     webhookStatus,
+    sentMessageId,
+    details: lineDetails,
   });
 });
 
@@ -163,7 +211,7 @@ app.post('/api/line/notify', async (req, res) => {
 app.post('/api/report/send-monthly', async (req, res) => {
   const { emails, recordsCount, settings } = req.body;
   console.log(`[REPORT] Scheduled monthly summary triggered for:`, emails);
-  
+
   // Forward report summary log to webhook
   try {
     const webhookUrl = settings?.webhookUrl || 'https://webhook.site/7a150790-aaf4-4ba2-ba66-4731f6d1b91a';

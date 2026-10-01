@@ -313,108 +313,68 @@ export function createLineFlexMessage(record: InspectionRecord, settings: System
 export async function sendLineAndWebhookNotifications(
   record: InspectionRecord,
   settings: SystemSettings
-): Promise<{ success: boolean; lineStatus: string; webhookStatus: string; error?: string }> {
+): Promise<{ success: boolean; lineStatus: string; webhookStatus: string; sentMessageId?: string; error?: string }> {
   const flexMessage = createLineFlexMessage(record, settings);
-  let lineStatus = 'pending';
-  let webhookStatus = 'pending';
 
-  // 1. Post to Server Proxy / Webhook
+  const payload = {
+    record,
+    flexMessage,
+    settings: {
+      groupId: settings.lineGroupId,
+      userId: settings.lineUserId,
+      lineChannelAccessToken: settings.lineChannelAccessToken,
+      webhookUrl: settings.webhookUrl,
+      sheetId: settings.sheetId,
+    },
+  };
+
   try {
-    const payload = {
-      record,
-      flexMessage,
-      settings: {
-        groupId: settings.lineGroupId,
-        userId: settings.lineUserId,
-        webhookUrl: settings.webhookUrl,
-        sheetId: settings.sheetId,
-      },
-    };
-
-    // Try posting to internal Express server proxy route
-    const serverResp = await fetch('/api/line/notify', {
+    // Send via backend proxy server (avoids browser CORS & token exposure)
+    const response = await fetch('/api/line/notify', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify(payload),
-    }).catch(() => null);
+    });
 
-    if (serverResp && serverResp.ok) {
-      const data = await serverResp.json();
+    if (response.ok) {
+      const data = await response.json();
       return {
-        success: true,
-        lineStatus: data.lineStatus || 'sent',
-        webhookStatus: data.webhookStatus || 'sent',
+        success: data.success,
+        lineStatus: data.lineStatus,
+        webhookStatus: data.webhookStatus,
+        sentMessageId: data.sentMessageId,
+      };
+    } else {
+      const errText = await response.text();
+      return {
+        success: false,
+        lineStatus: `HTTP ${response.status}`,
+        webhookStatus: 'error',
+        error: errText,
       };
     }
-  } catch (err) {
-    console.warn('Server proxy notify call failed, falling back to direct:', err);
-  }
+  } catch (err: any) {
+    console.error('Failed to notify via /api/line/notify:', err);
 
-  // 2. Direct Webhook Dispatch to Webhook URL (user provided: https://webhook.site/7a150790-aaf4-4ba2-ba66-4731f6d1b91a)
-  try {
-    if (settings.webhookUrl) {
-      await fetch(settings.webhookUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          event: 'OXYGEN_CHECK_SUBMITTED',
-          timestamp: record.timestamp,
-          date: record.date,
-          inspector: record.inspector,
-          readyDigitalTanks: record.readyDigitalTanks,
-          readyGaugeTanks: record.readyGaugeTanks,
-          totalReadyTanks: record.totalReadyTanks,
-          isLowStock: record.isLowStock,
-          issues: record.issues,
-          stations: {
-            ward4_9: record.ward4_9,
-            ward4_8_ari: record.ward4_8_ari,
-            building4_7_pt: record.building4_7_pt,
-            ward4_6: record.ward4_6,
-            building4_3_opd: record.building4_3_opd,
-            building4_2_icu: record.building4_2_icu,
-            building4_1_storage: record.building4_1_storage,
-          },
-          lineGroupId: settings.lineGroupId,
-          lineUserId: settings.lineUserId,
-          flexMessage,
-        }),
-        mode: 'no-cors', // allows posting to webhook without CORS blockage
-      });
-      webhookStatus = 'sent';
-    }
-  } catch {
-    webhookStatus = 'failed';
-  }
-
-  // 3. Direct LINE Push to Line API if token available
-  try {
-    if (settings.lineChannelAccessToken) {
-      // Push to Group
-      const targets = [settings.lineGroupId, settings.lineUserId].filter(Boolean);
-      for (const to of targets) {
-        await fetch('https://api.line.me/v2/bot/message/push', {
+    // Fallback: Dispatch to Webhook directly with no-cors so webhook.site receives it
+    try {
+      if (settings.webhookUrl) {
+        await fetch(settings.webhookUrl, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${settings.lineChannelAccessToken}`,
-          },
-          body: JSON.stringify({
-            to,
-            messages: [flexMessage],
-          }),
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
           mode: 'no-cors',
-        }).catch((e) => console.log('LINE direct push error:', e));
+        });
       }
-      lineStatus = 'dispatched';
-    }
-  } catch {
-    lineStatus = 'simulated';
-  }
+    } catch {}
 
-  return {
-    success: true,
-    lineStatus: lineStatus === 'pending' ? 'sent_to_queue' : lineStatus,
-    webhookStatus: webhookStatus === 'pending' ? 'sent' : webhookStatus,
-  };
+    return {
+      success: false,
+      lineStatus: 'connection_failed',
+      webhookStatus: 'fallback_sent',
+      error: err.message,
+    };
+  }
 }

@@ -30,6 +30,7 @@ interface RecordsTableProps {
   onEditRecord: (record: InspectionRecord) => void;
   onDeleteRecord: (id: string) => void;
   onPreviewLine: (record: InspectionRecord) => void;
+  onResetData?: () => void;
 }
 
 export const RecordsTable: React.FC<RecordsTableProps> = ({
@@ -42,17 +43,35 @@ export const RecordsTable: React.FC<RecordsTableProps> = ({
   onEditRecord,
   onDeleteRecord,
   onPreviewLine,
+  onResetData,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'low-stock' | 'issues' | 'normal'>('all');
+  const [sortOrder, setSortOrder] = useState<'desc' | 'asc'>('desc');
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 15;
 
   const [selectedRecord, setSelectedRecord] = useState<InspectionRecord | null>(null);
   const [resendStatus, setResendStatus] = useState<string | null>(null);
 
+  // Helper to parse date to timestamp for reliable sorting
+  const parseRecordTime = (r: InspectionRecord): number => {
+    try {
+      const parts = r.date.split('/');
+      if (parts.length >= 3) {
+        const d = parseInt(parts[0], 10);
+        const m = parseInt(parts[1], 10);
+        let y = parseInt(parts[2], 10);
+        if (y === 2568 || y === 68) y = 2025;
+        if (y === 2569 || y === 69) y = 2026;
+        return new Date(y, m - 1, d).getTime();
+      }
+    } catch {}
+    return 0;
+  };
+
   const filteredRecords = useMemo(() => {
-    return records.filter((r) => {
+    const list = records.filter((r) => {
       // Search match
       const searchLower = searchTerm.toLowerCase();
       const matchesSearch =
@@ -81,7 +100,16 @@ export const RecordsTable: React.FC<RecordsTableProps> = ({
 
       return matchesSearch && matchesStatus;
     });
-  }, [records, searchTerm, statusFilter]);
+
+    // Sort: newest first (desc) by default, or asc
+    list.sort((a, b) => {
+      const timeA = parseRecordTime(a);
+      const timeB = parseRecordTime(b);
+      return sortOrder === 'desc' ? timeB - timeA : timeA - timeB;
+    });
+
+    return list;
+  }, [records, searchTerm, statusFilter, sortOrder]);
 
   const totalPages = Math.ceil(filteredRecords.length / pageSize) || 1;
   const paginatedRecords = useMemo(() => {
@@ -162,10 +190,30 @@ export const RecordsTable: React.FC<RecordsTableProps> = ({
           >
             <span>มีปัญหาชำรุด</span>
           </button>
+
+          {/* Sort order toggle button */}
+          <button
+            onClick={() => setSortOrder((prev) => (prev === 'desc' ? 'asc' : 'desc'))}
+            className="px-3 py-1.5 rounded-lg whitespace-nowrap transition-colors bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold flex items-center space-x-1 border border-slate-200 shadow-2xs"
+            title={sortOrder === 'desc' ? 'เรียงจากใหม่สุดไปเก่าสุด' : 'เรียงจากเก่าสุดไปใหม่สุด'}
+          >
+            <ArrowUpDown className="w-3.5 h-3.5 text-slate-600" />
+            <span>{sortOrder === 'desc' ? 'ล่าสุดก่อน ⬇' : 'เก่าสุดก่อน ⬆'}</span>
+          </button>
         </div>
 
         {/* Export & New Button Group */}
         <div className="flex flex-wrap items-center gap-2">
+          {onResetData && (
+            <button
+              onClick={onResetData}
+              className="px-3 py-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors flex items-center space-x-1 border border-slate-200"
+              title="โหลดข้อมูลประวัติทั้งหมด 274 รายการ"
+            >
+              <span>🔄 โหลด 274 รายการ</span>
+            </button>
+          )}
+
           {/* Create new sheet template button */}
           <button
             onClick={() => downloadNewSheetTemplate(settings.sheetId)}
@@ -330,13 +378,15 @@ export const RecordsTable: React.FC<RecordsTableProps> = ({
                           >
                             <Eye className="w-3.5 h-3.5" />
                           </button>
-                          <button
-                            onClick={() => onPreviewLine(record)}
-                            title="พรีวิว LINE Flex Card"
-                            className="p-1 rounded-md text-slate-400 hover:text-emerald-600 hover:bg-emerald-50"
-                          >
-                            <Send className="w-3.5 h-3.5" />
-                          </button>
+                          {canRecord && (
+                            <button
+                              onClick={() => onPreviewLine(record)}
+                              title="พรีวิว LINE Flex Card"
+                              className="p-1 rounded-md text-slate-400 hover:text-emerald-600 hover:bg-emerald-50"
+                            >
+                              <Send className="w-3.5 h-3.5" />
+                            </button>
+                          )}
                           {canEdit && (
                             <>
                               <button
@@ -484,13 +534,17 @@ export const RecordsTable: React.FC<RecordsTableProps> = ({
 
               {/* Footer actions */}
               <div className="flex items-center justify-between pt-2">
-                <button
-                  onClick={() => handleResendLine(selectedRecord)}
-                  className="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold flex items-center space-x-1.5"
-                >
-                  <Send className="w-3.5 h-3.5" />
-                  <span>ส่งซ้ำเข้า LINE กลุ่ม</span>
-                </button>
+                {canRecord ? (
+                  <button
+                    onClick={() => handleResendLine(selectedRecord)}
+                    className="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold flex items-center space-x-1.5"
+                  >
+                    <Send className="w-3.5 h-3.5" />
+                    <span>ส่งซ้ำเข้า LINE กลุ่ม</span>
+                  </button>
+                ) : (
+                  <div></div>
+                )}
                 <button
                   onClick={() => setSelectedRecord(null)}
                   className="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded-xl text-xs font-medium"

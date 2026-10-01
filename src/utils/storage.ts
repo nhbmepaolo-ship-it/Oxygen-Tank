@@ -3,8 +3,8 @@ import { INITIAL_EMPLOYEES } from '../data/initialEmployees';
 import { INITIAL_RECORDS } from '../data/initialRecords';
 
 const STORAGE_KEYS = {
-  RECORDS: 'bme_oxygen_records_v1',
-  EMPLOYEES: 'bme_oxygen_employees_v1',
+  RECORDS: 'bme_oxygen_records_v5',
+  EMPLOYEES: 'bme_oxygen_employees_v2',
   SETTINGS: 'bme_oxygen_settings_v1',
   USER: 'bme_oxygen_current_user_v1',
 };
@@ -65,14 +65,19 @@ export function loadRecords(): InspectionRecord[] {
     const raw = localStorage.getItem(STORAGE_KEYS.RECORDS);
     if (raw) {
       const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length > 0) {
+      if (Array.isArray(parsed) && parsed.length >= INITIAL_RECORDS.length) {
         return parsed;
       }
     }
   } catch (e) {
     console.error('Failed to load records:', e);
   }
-  // Initialize with the provided historical data
+  // Initialize with the full provided historical dataset
+  saveRecords(INITIAL_RECORDS);
+  return INITIAL_RECORDS;
+}
+
+export function resetToInitialRecords(): InspectionRecord[] {
   saveRecords(INITIAL_RECORDS);
   return INITIAL_RECORDS;
 }
