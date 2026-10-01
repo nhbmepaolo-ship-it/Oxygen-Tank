@@ -260,7 +260,7 @@ export const RecordsTable: React.FC<RecordsTableProps> = ({
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold uppercase text-[11px] tracking-wider">
+              <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase text-[11px] tracking-wide">
                 <th className="py-3 px-3.5 whitespace-nowrap">วันที่ / เวลา</th>
                 <th className="py-3 px-3.5 whitespace-nowrap">ผู้ตรวจเช็ค</th>
                 <th className="py-3 px-3 text-center whitespace-nowrap">ถังดิจิตอล</th>
@@ -269,7 +269,7 @@ export const RecordsTable: React.FC<RecordsTableProps> = ({
                 <th className="py-3 px-3.5 text-center whitespace-nowrap">สถานะเกณฑ์</th>
                 <th className="py-3 px-3 whitespace-nowrap">ห้องเก็บ 4/1</th>
                 <th className="py-3 px-3 whitespace-nowrap">ICU 4/2</th>
-                <th className="py-3 px-4 whitespace-nowrap">ประเด็นปัญหาที่พบ</th>
+                <th className="py-3 px-3.5 min-w-[150px] max-w-[220px]">ประเด็นปัญหาที่พบ</th>
                 <th className="py-3 px-3.5 text-right whitespace-nowrap">การจัดการ</th>
               </tr>
             </thead>
@@ -291,19 +291,19 @@ export const RecordsTable: React.FC<RecordsTableProps> = ({
                       }`}
                     >
                       <td className="py-3 px-3.5 whitespace-nowrap font-medium text-slate-800">
-                        <div>{record.date}</div>
-                        <div className="text-[10px] text-slate-400">
+                        <div className="leading-snug">{record.date}</div>
+                        <div className="text-[10px] text-slate-400 leading-normal">
                           {record.timestamp.split(',')[1]?.trim() || ''}
                         </div>
                       </td>
 
                       <td className="py-3 px-3.5 whitespace-nowrap">
-                        <span className="font-semibold text-slate-800">{record.inspector}</span>
+                        <span className="font-semibold text-slate-800 leading-snug">{record.inspector}</span>
                       </td>
 
                       <td className="py-3 px-3 text-center whitespace-nowrap">
                         <span
-                          className={`font-bold px-2 py-0.5 rounded-md ${
+                          className={`font-bold px-2 py-0.5 rounded-md inline-block leading-normal ${
                             record.readyDigitalTanks < settings.digitalLowThreshold
                               ? 'bg-rose-100 text-rose-700'
                               : 'bg-teal-50 text-teal-800'
@@ -314,14 +314,14 @@ export const RecordsTable: React.FC<RecordsTableProps> = ({
                       </td>
 
                       <td className="py-3 px-3 text-center whitespace-nowrap">
-                        <span className="font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700">
+                        <span className="font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 inline-block leading-normal">
                           {record.readyGaugeTanks}
                         </span>
                       </td>
 
                       <td className="py-3 px-3.5 text-center whitespace-nowrap">
                         <span
-                          className={`font-extrabold px-2 py-0.5 rounded-md text-xs ${
+                          className={`font-black px-2 py-0.5 rounded-md text-xs inline-block leading-normal ${
                             isCrit
                               ? 'bg-rose-200 text-rose-800'
                               : 'bg-cyan-50 text-cyan-800'
@@ -333,29 +333,29 @@ export const RecordsTable: React.FC<RecordsTableProps> = ({
 
                       <td className="py-3 px-3.5 text-center whitespace-nowrap">
                         {isCrit ? (
-                          <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-700 border border-rose-200">
-                            <AlertTriangle className="w-3 h-3" />
+                          <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-700 border border-rose-200 leading-normal">
+                            <AlertTriangle className="w-3 h-3 shrink-0" />
                             <span>สั่งซื้อด่วน</span>
                           </span>
                         ) : (
-                          <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-100 text-emerald-700 border border-emerald-200">
-                            <CheckCircle className="w-3 h-3" />
+                          <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-100 text-emerald-700 border border-emerald-200 leading-normal">
+                            <CheckCircle className="w-3 h-3 shrink-0" />
                             <span>ปกติ</span>
                           </span>
                         )}
                       </td>
 
-                      <td className="py-3 px-3 whitespace-nowrap text-slate-600 font-mono text-[11px]">
+                      <td className="py-3 px-3 whitespace-nowrap text-slate-600 font-mono text-[11px] leading-normal">
                         {record.building4_1_storage}
                       </td>
 
-                      <td className="py-3 px-3 whitespace-nowrap text-slate-600 font-mono text-[11px]">
+                      <td className="py-3 px-3 whitespace-nowrap text-slate-600 font-mono text-[11px] leading-normal">
                         {record.building4_2_icu}
                       </td>
 
-                      <td className="py-3 px-4 max-w-xs truncate">
+                      <td className="py-3 px-3.5 min-w-[150px] max-w-[240px]">
                         <span
-                          className={`${
+                          className={`block break-words leading-snug text-xs ${
                             record.issues &&
                             record.issues !== 'พร้อมใช้งาน' &&
                             record.issues !== 'พร้อมใช้' &&

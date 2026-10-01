@@ -383,75 +383,75 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
       {/* 1. TOP OVERVIEW HERO BANNER */}
       {latestRecord && isLatestCritical ? (
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-rose-500 via-red-500 to-rose-600 text-white shadow-xl shadow-rose-500/20 p-6 sm:p-7 border border-rose-400/40">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 relative z-10">
-            <div className="flex items-start sm:items-center space-x-4">
-              <div className="p-3.5 bg-white/20 rounded-2xl shrink-0 backdrop-blur-md shadow-inner animate-pulse">
-                <span className="text-3xl">🚨</span>
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-rose-500 via-red-500 to-rose-600 text-white shadow-lg p-5 sm:p-6 border border-rose-400/40">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
+            <div className="flex items-start sm:items-center space-x-3.5">
+              <div className="p-3 bg-white/20 rounded-2xl shrink-0 backdrop-blur-md shadow-inner animate-pulse text-2xl">
+                🚨
               </div>
-              <div>
-                <div className="flex items-center space-x-2">
-                  <span className="font-extrabold text-xl sm:text-2xl tracking-tight">
+              <div className="space-y-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-bold text-base sm:text-lg text-white">
                     ถังออกซิเจนเหลือน้อยถึงเกณฑ์สั่งซื้อด่วน!
                   </span>
-                  <span className="px-2.5 py-0.5 text-xs font-black bg-white text-rose-700 rounded-full shadow-xs">
+                  <span className="px-2 py-0.5 text-[11px] font-bold bg-white text-rose-700 rounded-full shadow-xs">
                     วิกฤต
                   </span>
                 </div>
-                <p className="text-rose-100 text-xs sm:text-sm mt-1">
-                  📟 ถังดิจิตอลคงเหลือ: <strong>{latestRecord?.readyDigitalTanks} ถัง</strong> (เกณฑ์: {settings.digitalLowThreshold}) • 📦 รวมพร้อมใช้: <strong>{latestRecord?.totalReadyTanks} ถัง</strong> (เกณฑ์: {settings.totalLowThreshold})
+                <p className="text-rose-100 text-xs sm:text-sm leading-relaxed">
+                  📟 ถังดิจิตอล: <strong>{latestRecord?.readyDigitalTanks} ถัง</strong> (เกณฑ์: {settings.digitalLowThreshold}) • 📦 รวมพร้อมใช้: <strong>{latestRecord?.totalReadyTanks} ถัง</strong> (เกณฑ์: {settings.totalLowThreshold})
                 </p>
-                <div className="mt-2 text-[11px] text-white/90 flex flex-wrap items-center gap-2">
+                <div className="text-[11px] text-white/90 flex flex-wrap items-center gap-x-2 gap-y-1 pt-1">
                   <span>📅 ตรวจล่าสุด: {latestRecord?.date} ({latestRecord?.timestamp.split(',')[1]?.trim()})</span>
                   <span>•</span>
                   <span>👤 ผู้ตรวจ: {latestRecord?.inspector}</span>
                   <span>•</span>
-                  <span className="bg-rose-900/40 px-2 py-0.5 rounded-md">💬 ส่งแจ้งเตือน LINE แล้ว</span>
+                  <span className="bg-rose-900/40 px-2 py-0.5 rounded-md">💬 ส่ง LINE Alert แล้ว</span>
                 </div>
               </div>
             </div>
 
-            <div className="flex items-center space-x-2.5 shrink-0 self-start md:self-center">
+            <div className="flex items-center space-x-2 shrink-0 self-start md:self-center">
               <button
                 onClick={onNavigateToRecords}
-                className="px-5 py-2.5 bg-white text-rose-700 hover:bg-rose-50 rounded-2xl text-xs sm:text-sm font-bold shadow-md transition-all flex items-center space-x-1.5"
+                className="px-4 py-2 bg-white text-rose-700 hover:bg-rose-50 rounded-xl text-xs font-bold shadow-md transition-all flex items-center space-x-1.5"
               >
-                <span>📦 เปิดดูรายการตรวจเช็ค</span>
-                <ArrowUpRight className="w-4 h-4" />
+                <span>เปิดดูรายการตรวจเช็ค</span>
+                <ArrowUpRight className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
         </div>
       ) : latestRecord ? (
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 text-white shadow-xl shadow-teal-600/15 p-6 border border-teal-400/30">
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 text-white shadow-lg p-5 sm:p-6 border border-teal-400/30">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
-            <div className="flex items-center space-x-4">
-              <div className="p-3 bg-white/20 rounded-2xl shrink-0 backdrop-blur-md shadow-inner">
-                <span className="text-3xl">✅</span>
+            <div className="flex items-start sm:items-center space-x-3.5">
+              <div className="p-3 bg-white/20 rounded-2xl shrink-0 backdrop-blur-md shadow-inner text-2xl">
+                ✅
               </div>
-              <div>
-                <div className="flex items-center space-x-2">
-                  <span className="font-extrabold text-lg sm:text-xl tracking-tight">
+              <div className="space-y-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-bold text-base sm:text-lg text-white">
                     สถานะปริมาณถังออกซิเจน: ปกติ & พร้อมใช้งาน
                   </span>
-                  <span className="px-2.5 py-0.5 text-xs font-bold bg-white/25 text-white rounded-full">
+                  <span className="px-2 py-0.5 text-[11px] font-bold bg-white/25 text-white rounded-full">
                     ปลอดภัย
                   </span>
                 </div>
-                <p className="text-teal-100 text-xs sm:text-sm mt-0.5">
+                <p className="text-teal-100 text-xs sm:text-sm leading-relaxed">
                   📟 ดิจิตอลพร้อมใช้ {latestRecord?.readyDigitalTanks ?? 0} ถัง • 🎛️ หัวเกย์ {latestRecord?.readyGaugeTanks ?? 0} ถัง • 📦 รวมพร้อมใช้ {latestRecord?.totalReadyTanks ?? 0} ถัง
                 </p>
-                <p className="text-[11px] text-teal-200 mt-1">
+                <p className="text-[11px] text-teal-200 leading-normal">
                   🔧 ประเด็นปัญหาล่าสุด: {latestRecord?.issues || 'พร้อมใช้งาน'}
                 </p>
               </div>
             </div>
 
-            <div className="text-right self-start sm:self-center flex flex-col items-start sm:items-end">
-              <span className="inline-block px-3.5 py-1.5 bg-white/20 backdrop-blur-md rounded-full text-xs font-semibold text-white">
+            <div className="text-right self-start sm:self-center flex flex-col items-start sm:items-end gap-1">
+              <span className="inline-block px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-semibold text-white">
                 📅 ตรวจล่าสุด: {latestRecord?.date} ({latestRecord?.inspector})
               </span>
-              <span className="text-[11px] text-teal-100 mt-1">
+              <span className="text-[11px] text-teal-100">
                 ฐานข้อมูลรวม {records.length} วันตรวจเช็ค
               </span>
             </div>
@@ -460,23 +460,23 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       ) : null}
 
       {/* 2. THREE KEY OXYGEN STOCK CARDS */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
         {/* Card 1: Digital Ready Tanks */}
-        <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs hover:shadow-md transition-all relative overflow-hidden group">
-          <div className="flex items-center justify-between">
+        <div className="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200/80 shadow-xs hover:shadow-md transition-all relative overflow-hidden group">
+          <div className="flex items-center justify-between gap-2">
             <div className="flex items-center space-x-2.5">
-              <div className="w-10 h-10 rounded-2xl bg-teal-50 border border-teal-100 flex items-center justify-center text-lg">
+              <div className="w-9 h-9 rounded-xl bg-teal-50 border border-teal-100 flex items-center justify-center text-base shrink-0">
                 📟
               </div>
               <div>
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block">
+                <span className="text-xs font-bold text-slate-800 block leading-snug">
                   ถังดิจิตอลรุ่นใหม่
                 </span>
-                <span className="text-[11px] text-slate-400">Digital Oxygen Tank</span>
+                <span className="text-[11px] text-slate-400 block leading-normal">Digital Tank (LCD)</span>
               </div>
             </div>
             <span
-              className={`text-xs px-2.5 py-1 rounded-full font-bold ${
+              className={`text-[11px] px-2.5 py-0.5 rounded-full font-bold shrink-0 ${
                 (latestRecord?.readyDigitalTanks ?? 0) < settings.digitalLowThreshold
                   ? 'bg-rose-100 text-rose-700'
                   : 'bg-teal-100 text-teal-800'
@@ -488,21 +488,20 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </span>
           </div>
 
-          <div className="mt-4 flex items-baseline justify-between">
-            <div>
-              <span className="text-3.5xl sm:text-4xl font-black text-slate-900 tracking-tight">
+          <div className="mt-3 flex flex-wrap items-baseline justify-between gap-y-1.5 gap-x-2">
+            <div className="flex items-baseline space-x-1.5">
+              <span className="text-2xl sm:text-2.5xl font-black text-slate-900 leading-tight">
                 {latestRecord?.readyDigitalTanks ?? 0}
               </span>
-              <span className="text-sm font-bold text-slate-500 ml-1.5">ถังพร้อมใช้</span>
+              <span className="text-xs font-medium text-slate-600">ถังพร้อมใช้</span>
             </div>
-            <div className="text-right text-xs text-slate-400">
-              <span>เกณฑ์สั่งซื้อ: </span>
-              <strong className="text-slate-600">&lt; {settings.digitalLowThreshold} ถัง</strong>
+            <div className="text-xs text-slate-600 bg-slate-50 px-2 py-0.5 rounded-lg border border-slate-200/60 leading-normal">
+              เกณฑ์สั่งซื้อ: <strong className="text-slate-800 font-bold">&lt; {settings.digitalLowThreshold} ถัง</strong>
             </div>
           </div>
 
           {/* Progress gauge bar */}
-          <div className="mt-4 w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+          <div className="mt-3 w-full bg-slate-100 rounded-full h-2 overflow-hidden">
             <div
               className={`h-full rounded-full transition-all duration-500 ${
                 (latestRecord?.readyDigitalTanks ?? 0) < settings.digitalLowThreshold
@@ -517,21 +516,21 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
 
         {/* Card 2: Gauge Ready Tanks */}
-        <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs hover:shadow-md transition-all relative overflow-hidden group">
-          <div className="flex items-center justify-between">
+        <div className="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200/80 shadow-xs hover:shadow-md transition-all relative overflow-hidden group">
+          <div className="flex items-center justify-between gap-2">
             <div className="flex items-center space-x-2.5">
-              <div className="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-lg">
+              <div className="w-9 h-9 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-base shrink-0">
                 🎛️
               </div>
               <div>
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block">
+                <span className="text-xs font-bold text-slate-800 block leading-snug">
                   ถังแบบหัวเกย์รุ่นเก่า
                 </span>
-                <span className="text-[11px] text-slate-400">Standard Gauge Tank</span>
+                <span className="text-[11px] text-slate-400 block leading-normal">Standard Gauge (เข็ม)</span>
               </div>
             </div>
             <span
-              className={`text-xs px-2.5 py-1 rounded-full font-bold ${
+              className={`text-[11px] px-2.5 py-0.5 rounded-full font-bold shrink-0 ${
                 (latestRecord?.readyGaugeTanks ?? 0) < settings.gaugeLowThreshold
                   ? 'bg-amber-100 text-amber-700'
                   : 'bg-indigo-100 text-indigo-800'
@@ -543,21 +542,20 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </span>
           </div>
 
-          <div className="mt-4 flex items-baseline justify-between">
-            <div>
-              <span className="text-3.5xl sm:text-4xl font-black text-slate-900 tracking-tight">
+          <div className="mt-3 flex flex-wrap items-baseline justify-between gap-y-1.5 gap-x-2">
+            <div className="flex items-baseline space-x-1.5">
+              <span className="text-2xl sm:text-2.5xl font-black text-slate-900 leading-tight">
                 {latestRecord?.readyGaugeTanks ?? 0}
               </span>
-              <span className="text-sm font-bold text-slate-500 ml-1.5">ถังพร้อมใช้</span>
+              <span className="text-xs font-medium text-slate-600">ถังพร้อมใช้</span>
             </div>
-            <div className="text-right text-xs text-slate-400">
-              <span>สำรองใช้งาน: </span>
-              <strong className="text-slate-600">&gt;= {settings.gaugeLowThreshold} ถัง</strong>
+            <div className="text-xs text-slate-600 bg-slate-50 px-2 py-0.5 rounded-lg border border-slate-200/60 leading-normal">
+              สำรองใช้งาน: <strong className="text-slate-800 font-bold">&ge; {settings.gaugeLowThreshold} ถัง</strong>
             </div>
           </div>
 
           {/* Progress gauge bar */}
-          <div className="mt-4 w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+          <div className="mt-3 w-full bg-slate-100 rounded-full h-2 overflow-hidden">
             <div
               className="h-full bg-indigo-500 rounded-full transition-all duration-500"
               style={{
@@ -568,36 +566,36 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
 
         {/* Card 3: Combined Total Ready Tanks */}
-        <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs hover:shadow-md transition-all relative overflow-hidden group">
-          <div className="flex items-center justify-between">
+        <div className="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200/80 shadow-xs hover:shadow-md transition-all relative overflow-hidden group">
+          <div className="flex items-center justify-between gap-2">
             <div className="flex items-center space-x-2.5">
-              <div className="w-10 h-10 rounded-2xl bg-cyan-50 border border-cyan-100 flex items-center justify-center text-lg">
+              <div className="w-9 h-9 rounded-xl bg-cyan-50 border border-cyan-100 flex items-center justify-center text-base shrink-0">
                 📦
               </div>
               <div>
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block">
+                <span className="text-xs font-bold text-slate-800 block leading-snug">
                   รวมออกซิเจนพร้อมใช้ทั้งหมด
                 </span>
-                <span className="text-[11px] text-slate-400">Total Oxygen Available</span>
+                <span className="text-[11px] text-slate-400 block leading-normal">Total Oxygen Available</span>
               </div>
             </div>
             <span
-              className={`text-xs px-2.5 py-1 rounded-full font-bold ${
+              className={`text-[11px] px-2.5 py-0.5 rounded-full font-bold shrink-0 ${
                 (latestRecord?.totalReadyTanks ?? 0) < settings.totalLowThreshold
                   ? 'bg-rose-100 text-rose-700 animate-pulse'
                   : 'bg-emerald-100 text-emerald-800'
               }`}
             >
               {(latestRecord?.totalReadyTanks ?? 0) < settings.totalLowThreshold
-                ? '🚨 ต้องสั่งซื้อด่วน'
+                ? '🚨 ต้องสั่งด่วน'
                 : '🛡️ ปลอดภัย'}
             </span>
           </div>
 
-          <div className="mt-4 flex items-baseline justify-between">
-            <div>
+          <div className="mt-3 flex flex-wrap items-baseline justify-between gap-y-1.5 gap-x-2">
+            <div className="flex items-baseline space-x-1.5">
               <span
-                className={`text-3.5xl sm:text-4xl font-black tracking-tight ${
+                className={`text-2xl sm:text-2.5xl font-black leading-tight ${
                   (latestRecord?.totalReadyTanks ?? 0) < settings.totalLowThreshold
                     ? 'text-rose-600'
                     : 'text-teal-900'
@@ -605,16 +603,15 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               >
                 {latestRecord?.totalReadyTanks ?? 0}
               </span>
-              <span className="text-sm font-bold text-slate-500 ml-1.5">ถังรวมสุทธิ</span>
+              <span className="text-xs font-medium text-slate-600">ถังรวมสุทธิ</span>
             </div>
-            <div className="text-right text-xs text-slate-400">
-              <span>เกณฑ์รวม: </span>
-              <strong className="text-slate-600">&lt; {settings.totalLowThreshold} ถัง</strong>
+            <div className="text-xs text-slate-600 bg-slate-50 px-2 py-0.5 rounded-lg border border-slate-200/60 leading-normal">
+              เกณฑ์รวม: <strong className="text-slate-800 font-bold">&lt; {settings.totalLowThreshold} ถัง</strong>
             </div>
           </div>
 
           {/* Progress total bar */}
-          <div className="mt-4 w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+          <div className="mt-3 w-full bg-slate-100 rounded-full h-2 overflow-hidden">
             <div
               className={`h-full rounded-full transition-all duration-500 ${
                 (latestRecord?.totalReadyTanks ?? 0) < settings.totalLowThreshold
@@ -657,17 +654,17 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
 
         {/* 4 Comparative Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 text-xs">
           {/* Item 1: Digital */}
-          <div className="p-4 rounded-2xl bg-teal-50/50 border border-teal-200/80 flex flex-col justify-between space-y-3">
+          <div className="p-4 rounded-2xl bg-teal-50/50 border border-teal-200/80 flex flex-col justify-between space-y-2.5">
             <div>
-              <div className="flex items-center justify-between">
-                <span className="font-extrabold text-teal-900 flex items-center space-x-1.5">
-                  <span className="text-base">📟</span>
+              <div className="flex items-center justify-between gap-1">
+                <span className="font-bold text-teal-900 flex items-center space-x-1.5 text-xs sm:text-sm">
+                  <span>📟</span>
                   <span>ถังดิจิตอลรุ่นใหม่</span>
                 </span>
                 <span
-                  className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                  className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${
                     (latestRecord?.readyDigitalTanks ?? 0) < settings.digitalLowThreshold
                       ? 'bg-rose-100 text-rose-700'
                       : 'bg-teal-100 text-teal-800'
@@ -676,32 +673,32 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   {(latestRecord?.readyDigitalTanks ?? 0) < settings.digitalLowThreshold ? '🚨 สั่งซื้อ' : '✅ ปกติ'}
                 </span>
               </div>
-              <div className="mt-3 flex items-baseline space-x-1.5">
-                <span className="text-3xl font-black text-teal-900">
+              <div className="mt-2.5 flex items-baseline space-x-1.5">
+                <span className="text-xl sm:text-2xl font-black text-teal-900 leading-tight">
                   {latestRecord?.readyDigitalTanks ?? 0}
                 </span>
-                <span className="text-teal-700 font-bold">ถังพร้อมใช้</span>
+                <span className="text-xs text-teal-700 font-medium">ถังพร้อมใช้</span>
               </div>
-              <p className="text-[11px] text-slate-600 mt-2 leading-relaxed">
+              <p className="text-xs text-slate-600 mt-2 leading-relaxed break-words">
                 <strong>วิธีดู:</strong> มีหน้าจอ LCD ดิจิตอล แสดงตัวเลข Bar/PSI ชัดเจน
               </p>
             </div>
-            <div className="pt-2 border-t border-teal-200/60 text-[11px] text-slate-500 flex items-center justify-between">
+            <div className="pt-2 border-t border-teal-200/60 text-xs text-slate-500 flex flex-wrap items-center justify-between gap-1 leading-normal">
               <span>เกณฑ์สั่งซื้อ:</span>
               <strong className="text-teal-900">&lt; {settings.digitalLowThreshold} ถัง</strong>
             </div>
           </div>
 
           {/* Item 2: Gauge */}
-          <div className="p-4 rounded-2xl bg-indigo-50/50 border border-indigo-200/80 flex flex-col justify-between space-y-3">
+          <div className="p-4 rounded-2xl bg-indigo-50/50 border border-indigo-200/80 flex flex-col justify-between space-y-2.5">
             <div>
-              <div className="flex items-center justify-between">
-                <span className="font-extrabold text-indigo-900 flex items-center space-x-1.5">
-                  <span className="text-base">🎛️</span>
+              <div className="flex items-center justify-between gap-1">
+                <span className="font-bold text-indigo-900 flex items-center space-x-1.5 text-xs sm:text-sm">
+                  <span>🎛️</span>
                   <span>ถังหัวเกย์รุ่นเก่า</span>
                 </span>
                 <span
-                  className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                  className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${
                     (latestRecord?.readyGaugeTanks ?? 0) < settings.gaugeLowThreshold
                       ? 'bg-amber-100 text-amber-800'
                       : 'bg-indigo-100 text-indigo-800'
@@ -710,32 +707,32 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   {(latestRecord?.readyGaugeTanks ?? 0) < settings.gaugeLowThreshold ? '⚠️ สต็อกน้อย' : '✅ พร้อมใช้'}
                 </span>
               </div>
-              <div className="mt-3 flex items-baseline space-x-1.5">
-                <span className="text-3xl font-black text-indigo-900">
+              <div className="mt-2.5 flex items-baseline space-x-1.5">
+                <span className="text-xl sm:text-2xl font-black text-indigo-900 leading-tight">
                   {latestRecord?.readyGaugeTanks ?? 0}
                 </span>
-                <span className="text-indigo-700 font-bold">ถังพร้อมใช้</span>
+                <span className="text-xs text-indigo-700 font-medium">ถังพร้อมใช้</span>
               </div>
-              <p className="text-[11px] text-slate-600 mt-2 leading-relaxed">
+              <p className="text-xs text-slate-600 mt-2 leading-relaxed break-words">
                 <strong>วิธีดู:</strong> หน้าปัดเกจเข็มหมุนอนาล็อก (Needle Gauge)
               </p>
             </div>
-            <div className="pt-2 border-t border-indigo-200/60 text-[11px] text-slate-500 flex items-center justify-between">
+            <div className="pt-2 border-t border-indigo-200/60 text-xs text-slate-500 flex flex-wrap items-center justify-between gap-1 leading-normal">
               <span>เกณฑ์สำรอง:</span>
-              <strong className="text-indigo-900">&gt;= {settings.gaugeLowThreshold} ถัง</strong>
+              <strong className="text-indigo-900">&ge; {settings.gaugeLowThreshold} ถัง</strong>
             </div>
           </div>
 
           {/* Item 3: Total */}
-          <div className="p-4 rounded-2xl bg-cyan-50/50 border border-cyan-200/80 flex flex-col justify-between space-y-3">
+          <div className="p-4 rounded-2xl bg-cyan-50/50 border border-cyan-200/80 flex flex-col justify-between space-y-2.5">
             <div>
-              <div className="flex items-center justify-between">
-                <span className="font-extrabold text-cyan-900 flex items-center space-x-1.5">
-                  <span className="text-base">📦</span>
+              <div className="flex items-center justify-between gap-1">
+                <span className="font-bold text-cyan-900 flex items-center space-x-1.5 text-xs sm:text-sm">
+                  <span>📦</span>
                   <span>รวมพร้อมใช้ทั้งหมด</span>
                 </span>
                 <span
-                  className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                  className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${
                     (latestRecord?.totalReadyTanks ?? 0) < settings.totalLowThreshold
                       ? 'bg-rose-100 text-rose-700 font-black'
                       : 'bg-emerald-100 text-emerald-800'
@@ -744,48 +741,48 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   {(latestRecord?.totalReadyTanks ?? 0) < settings.totalLowThreshold ? '🚨 สั่งด่วน' : '🛡️ ปลอดภัย'}
                 </span>
               </div>
-              <div className="mt-3 flex items-baseline space-x-1.5">
-                <span className="text-3xl font-black text-cyan-900">
+              <div className="mt-2.5 flex items-baseline space-x-1.5">
+                <span className="text-xl sm:text-2xl font-black text-cyan-900 leading-tight">
                   {latestRecord?.totalReadyTanks ?? 0}
                 </span>
-                <span className="text-cyan-700 font-bold">ถังรวมสุทธิ</span>
+                <span className="text-xs text-cyan-700 font-medium">ถังรวมสุทธิ</span>
               </div>
-              <p className="text-[11px] text-slate-600 mt-2 leading-relaxed">
-                <strong>สูตรคำนวณ:</strong> ดิจิตอล ({latestRecord?.readyDigitalTanks ?? 0}) + หัวเกย์ ({latestRecord?.readyGaugeTanks ?? 0})
+              <p className="text-xs text-slate-600 mt-2 leading-relaxed break-words">
+                <strong>สูตร:</strong> ดิจิตอล ({latestRecord?.readyDigitalTanks ?? 0}) + หัวเกย์ ({latestRecord?.readyGaugeTanks ?? 0})
               </p>
             </div>
-            <div className="pt-2 border-t border-cyan-200/60 text-[11px] text-slate-500 flex items-center justify-between">
+            <div className="pt-2 border-t border-cyan-200/60 text-xs text-slate-500 flex flex-wrap items-center justify-between gap-1 leading-normal">
               <span>เกณฑ์วิกฤต:</span>
               <strong className="text-rose-700 font-black">&lt; {settings.totalLowThreshold} ถัง</strong>
             </div>
           </div>
 
           {/* Item 4: Ward Pipeline Stations */}
-          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 flex flex-col justify-between space-y-3">
+          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 flex flex-col justify-between space-y-2.5">
             <div>
-              <div className="flex items-center justify-between">
-                <span className="font-extrabold text-slate-900 flex items-center space-x-1.5">
-                  <span className="text-base">🏥</span>
+              <div className="flex items-center justify-between gap-1">
+                <span className="font-bold text-slate-900 flex items-center space-x-1.5 text-xs sm:text-sm">
+                  <span>🏥</span>
                   <span>ท่อส่งก๊าซ 7 จุดตรวจ</span>
                 </span>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-200 text-slate-700">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-200 text-slate-700 shrink-0">
                   ระบบไปป์ไลน์
                 </span>
               </div>
-              <p className="text-[11px] text-slate-500 mt-1">
-                ระบบท่อก๊าซกลางติดผนัง (ไม่ใช่ถังเคลื่อนย้าย)
+              <p className="text-xs text-slate-500 mt-1 leading-normal break-words">
+                ท่อก๊าซติดผนัง (ไม่ใช่ถังเคลื่อนย้าย)
               </p>
-              <div className="mt-2.5 grid grid-cols-2 gap-1 text-[10px] font-mono">
-                <div className="p-1 rounded bg-white border border-slate-200">W4/9: <strong>{latestRecord?.ward4_9 || '-'}</strong></div>
-                <div className="p-1 rounded bg-white border border-slate-200">ARI: <strong>{latestRecord?.ward4_8_ari || '-'}</strong></div>
-                <div className="p-1 rounded bg-white border border-slate-200">PT: <strong>{latestRecord?.building4_7_pt || '-'}</strong></div>
-                <div className="p-1 rounded bg-white border border-slate-200">W4/6: <strong>{latestRecord?.ward4_6 || '-'}</strong></div>
-                <div className="p-1 rounded bg-white border border-slate-200">OPD: <strong>{latestRecord?.building4_3_opd || '-'}</strong></div>
-                <div className="p-1 rounded bg-white border border-slate-200">ICU: <strong>{latestRecord?.building4_2_icu || '-'}</strong></div>
+              <div className="mt-2 flex flex-wrap gap-1 text-[11px] leading-normal">
+                <span className="px-1.5 py-0.5 rounded bg-white border border-slate-200">W4/9: <strong>{latestRecord?.ward4_9 || '-'}</strong></span>
+                <span className="px-1.5 py-0.5 rounded bg-white border border-slate-200">ARI: <strong>{latestRecord?.ward4_8_ari || '-'}</strong></span>
+                <span className="px-1.5 py-0.5 rounded bg-white border border-slate-200">PT: <strong>{latestRecord?.building4_7_pt || '-'}</strong></span>
+                <span className="px-1.5 py-0.5 rounded bg-white border border-slate-200">W4/6: <strong>{latestRecord?.ward4_6 || '-'}</strong></span>
+                <span className="px-1.5 py-0.5 rounded bg-white border border-slate-200">OPD: <strong>{latestRecord?.building4_3_opd || '-'}</strong></span>
+                <span className="px-1.5 py-0.5 rounded bg-white border border-slate-200">ICU: <strong>{latestRecord?.building4_2_icu || '-'}</strong></span>
               </div>
             </div>
-            <div className="pt-2 border-t border-slate-200 text-[10px] text-slate-500">
-              ห้องเก็บ 4/1: <strong className="text-teal-900">{latestRecord?.building4_1_storage || '-'}</strong>
+            <div className="pt-2 border-t border-slate-200 text-xs text-slate-600 leading-normal">
+              ห้องเก็บ 4/1: <strong className="text-teal-900 font-bold">{latestRecord?.building4_1_storage || '-'}</strong>
             </div>
           </div>
         </div>
@@ -1085,26 +1082,26 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                     ? 'bg-rose-950/40 border-rose-500/50 text-rose-100'
                     : 'bg-teal-950/40 border-teal-500/40 text-teal-100'
                 }`}>
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between gap-1">
                     <span className="text-xs font-bold flex items-center space-x-1.5 text-teal-300">
                       <span>📟</span>
                       <span>ถังดิจิตอลรุ่นใหม่</span>
                     </span>
-                    <span className={`text-[10px] font-black px-2 py-0.5 rounded-md ${
+                    <span className={`text-[10px] font-black px-2 py-0.5 rounded-md shrink-0 ${
                       digCrit ? 'bg-rose-500 text-white' : 'bg-teal-500/30 text-teal-200 border border-teal-400/30'
                     }`}>
                       {digCrit ? '🚨 ต่ำกว่าเกณฑ์' : '✅ พร้อมใช้งาน'}
                     </span>
                   </div>
-                  <div className="mt-2 flex items-baseline justify-between">
-                    <span className="text-3xl font-black text-white tracking-tight">
+                  <div className="mt-2 flex flex-wrap items-baseline justify-between gap-1">
+                    <span className="text-2xl sm:text-2.5xl font-black text-white leading-tight">
                       {activeRecord.readyDigitalTanks}
                     </span>
-                    <span className="text-xs text-slate-300 font-semibold">
+                    <span className="text-xs text-slate-300 font-medium leading-normal">
                       ถังพร้อมใช้ (เกณฑ์ &ge; {settings.digitalLowThreshold})
                     </span>
                   </div>
-                  <div className="mt-2 text-[11px] text-teal-200/80">
+                  <div className="mt-2 text-[11px] text-teal-200/80 leading-normal">
                     สัดส่วน: {Math.round((activeRecord.readyDigitalTanks / Math.max(1, activeRecord.totalReadyTanks)) * 100)}% ของสต็อกรวม
                   </div>
                 </div>
@@ -1115,26 +1112,26 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                     ? 'bg-amber-950/40 border-amber-500/50 text-amber-100'
                     : 'bg-indigo-950/40 border-indigo-500/40 text-indigo-100'
                 }`}>
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between gap-1">
                     <span className="text-xs font-bold flex items-center space-x-1.5 text-indigo-300">
                       <span>🎛️</span>
                       <span>ถังหัวเกย์รุ่นเก่า</span>
                     </span>
-                    <span className={`text-[10px] font-black px-2 py-0.5 rounded-md ${
+                    <span className={`text-[10px] font-black px-2 py-0.5 rounded-md shrink-0 ${
                       gaugeCrit ? 'bg-amber-500 text-slate-950' : 'bg-indigo-500/30 text-indigo-200 border border-indigo-400/30'
                     }`}>
                       {gaugeCrit ? '⚠️ สต็อกน้อย' : '✅ พร้อมใช้งาน'}
                     </span>
                   </div>
-                  <div className="mt-2 flex items-baseline justify-between">
-                    <span className="text-3xl font-black text-white tracking-tight">
+                  <div className="mt-2 flex flex-wrap items-baseline justify-between gap-1">
+                    <span className="text-2xl sm:text-2.5xl font-black text-white leading-tight">
                       {activeRecord.readyGaugeTanks}
                     </span>
-                    <span className="text-xs text-slate-300 font-semibold">
+                    <span className="text-xs text-slate-300 font-medium leading-normal">
                       ถังพร้อมใช้ (สำรอง &ge; {settings.gaugeLowThreshold})
                     </span>
                   </div>
-                  <div className="mt-2 text-[11px] text-indigo-200/80">
+                  <div className="mt-2 text-[11px] text-indigo-200/80 leading-normal">
                     สัดส่วน: {Math.round((activeRecord.readyGaugeTanks / Math.max(1, activeRecord.totalReadyTanks)) * 100)}% ของสต็อกรวม
                   </div>
                 </div>
@@ -1145,34 +1142,34 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                     ? 'bg-rose-900/50 border-rose-500 text-rose-100 shadow-md shadow-rose-950/50'
                     : 'bg-emerald-950/40 border-emerald-500/40 text-emerald-100'
                 }`}>
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between gap-1">
                     <span className="text-xs font-bold flex items-center space-x-1.5 text-white">
                       <span>📦</span>
                       <span>รวมออกซิเจนพร้อมใช้</span>
                     </span>
-                    <span className={`text-[10px] font-black px-2 py-0.5 rounded-md ${
+                    <span className={`text-[10px] font-black px-2 py-0.5 rounded-md shrink-0 ${
                       isCrit ? 'bg-rose-500 text-white animate-pulse' : 'bg-emerald-500/30 text-emerald-200 border border-emerald-400/30'
                     }`}>
-                      {isCrit ? '🚨 ต่ำกว่าเกณฑ์สั่งด่วน' : '🛡️ สต็อกปลอดภัย'}
+                      {isCrit ? '🚨 ต่ำกว่าเกณฑ์' : '🛡️ สต็อกปลอดภัย'}
                     </span>
                   </div>
-                  <div className="mt-2 flex items-baseline justify-between">
-                    <span className={`text-3xl font-black tracking-tight ${isCrit ? 'text-rose-300' : 'text-emerald-300'}`}>
+                  <div className="mt-2 flex flex-wrap items-baseline justify-between gap-1">
+                    <span className={`text-2xl sm:text-2.5xl font-black leading-tight ${isCrit ? 'text-rose-300' : 'text-emerald-300'}`}>
                       {activeRecord.totalReadyTanks}
                     </span>
-                    <span className="text-xs text-slate-300 font-semibold">
+                    <span className="text-xs text-slate-300 font-medium leading-normal">
                       ถังรวมทั้งหมด (เกณฑ์ &ge; {settings.totalLowThreshold})
                     </span>
                   </div>
-                  <div className="mt-2 text-[11px] text-slate-300 flex items-center justify-between">
-                    <span>🔧 ปัญหา: {activeRecord.issues || 'พร้อมใช้ปกติ'}</span>
+                  <div className="mt-2 text-[11px] text-slate-300 flex items-center justify-between leading-normal">
+                    <span className="truncate max-w-[200px]">🔧 ปัญหา: {activeRecord.issues || 'พร้อมใช้ปกติ'}</span>
                     {pinnedRecord && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           setPinnedRecord(null);
                         }}
-                        className="text-amber-300 hover:underline text-[10px] font-bold"
+                        className="text-amber-300 hover:underline text-[10px] font-bold shrink-0 ml-1"
                       >
                         ยกเลิกตรึง
                       </button>
@@ -1519,15 +1516,15 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           {/* Station 1: Ward 4/9 */}
           <div className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200/80 hover:border-teal-300 transition-all flex flex-col justify-between">
             <div>
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-1">
                 <span className="font-extrabold text-slate-900 text-sm">Ward 4/9</span>
                 <span className="text-[10px] text-slate-400">ชั้น 9</span>
               </div>
-              <span className="text-xs text-slate-500 block mt-0.5">วอร์ดผู้ป่วยใน</span>
+              <span className="text-xs text-slate-500 block mt-0.5 leading-normal">วอร์ดผู้ป่วยใน</span>
             </div>
-            <div className="mt-3 pt-2 border-t border-slate-200/60 flex items-center justify-between">
+            <div className="mt-3 pt-2 border-t border-slate-200/60 flex flex-wrap items-center justify-between gap-1">
               <span className="text-[11px] text-slate-500 font-medium">แรงดัน:</span>
-              <span className={`text-xs px-2.5 py-0.5 rounded-lg border ${getStationBadge(latestRecord?.ward4_9).bg}`}>
+              <span className={`text-xs px-2.5 py-0.5 rounded-lg border leading-normal ${getStationBadge(latestRecord?.ward4_9).bg}`}>
                 {getStationBadge(latestRecord?.ward4_9).icon} {getStationBadge(latestRecord?.ward4_9).text}
               </span>
             </div>
@@ -1536,15 +1533,15 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           {/* Station 2: Ward 4/8 (ARI) */}
           <div className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200/80 hover:border-teal-300 transition-all flex flex-col justify-between">
             <div>
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-1">
                 <span className="font-extrabold text-slate-900 text-sm">Ward 4/8 (ARI)</span>
                 <span className="text-[10px] text-slate-400">ชั้น 8</span>
               </div>
-              <span className="text-xs text-slate-500 block mt-0.5">แผนกระบบทางเดินหายใจ</span>
+              <span className="text-xs text-slate-500 block mt-0.5 leading-normal">แผนกระบบทางเดินหายใจ</span>
             </div>
-            <div className="mt-3 pt-2 border-t border-slate-200/60 flex items-center justify-between">
+            <div className="mt-3 pt-2 border-t border-slate-200/60 flex flex-wrap items-center justify-between gap-1">
               <span className="text-[11px] text-slate-500 font-medium">แรงดัน:</span>
-              <span className={`text-xs px-2.5 py-0.5 rounded-lg border ${getStationBadge(latestRecord?.ward4_8_ari).bg}`}>
+              <span className={`text-xs px-2.5 py-0.5 rounded-lg border leading-normal ${getStationBadge(latestRecord?.ward4_8_ari).bg}`}>
                 {getStationBadge(latestRecord?.ward4_8_ari).icon} {getStationBadge(latestRecord?.ward4_8_ari).text}
               </span>
             </div>
@@ -1553,15 +1550,15 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           {/* Station 3: อาคาร 4/7 (PT) */}
           <div className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200/80 hover:border-teal-300 transition-all flex flex-col justify-between">
             <div>
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-1">
                 <span className="font-extrabold text-slate-900 text-sm">อาคาร 4/7 (PT)</span>
                 <span className="text-[10px] text-slate-400">ชั้น 7</span>
               </div>
-              <span className="text-xs text-slate-500 block mt-0.5">กายภาพบำบัด</span>
+              <span className="text-xs text-slate-500 block mt-0.5 leading-normal">กายภาพบำบัด</span>
             </div>
-            <div className="mt-3 pt-2 border-t border-slate-200/60 flex items-center justify-between">
+            <div className="mt-3 pt-2 border-t border-slate-200/60 flex flex-wrap items-center justify-between gap-1">
               <span className="text-[11px] text-slate-500 font-medium">แรงดัน:</span>
-              <span className={`text-xs px-2.5 py-0.5 rounded-lg border ${getStationBadge(latestRecord?.building4_7_pt).bg}`}>
+              <span className={`text-xs px-2.5 py-0.5 rounded-lg border leading-normal ${getStationBadge(latestRecord?.building4_7_pt).bg}`}>
                 {getStationBadge(latestRecord?.building4_7_pt).icon} {getStationBadge(latestRecord?.building4_7_pt).text}
               </span>
             </div>
@@ -1570,15 +1567,15 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           {/* Station 4: Ward 4/6 */}
           <div className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200/80 hover:border-teal-300 transition-all flex flex-col justify-between">
             <div>
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-1">
                 <span className="font-extrabold text-slate-900 text-sm">Ward 4/6</span>
                 <span className="text-[10px] text-slate-400">ชั้น 6</span>
               </div>
-              <span className="text-xs text-slate-500 block mt-0.5">วอร์ดผู้ป่วยใน</span>
+              <span className="text-xs text-slate-500 block mt-0.5 leading-normal">วอร์ดผู้ป่วยใน</span>
             </div>
-            <div className="mt-3 pt-2 border-t border-slate-200/60 flex items-center justify-between">
+            <div className="mt-3 pt-2 border-t border-slate-200/60 flex flex-wrap items-center justify-between gap-1">
               <span className="text-[11px] text-slate-500 font-medium">แรงดัน:</span>
-              <span className={`text-xs px-2.5 py-0.5 rounded-lg border ${getStationBadge(latestRecord?.ward4_6).bg}`}>
+              <span className={`text-xs px-2.5 py-0.5 rounded-lg border leading-normal ${getStationBadge(latestRecord?.ward4_6).bg}`}>
                 {getStationBadge(latestRecord?.ward4_6).icon} {getStationBadge(latestRecord?.ward4_6).text}
               </span>
             </div>
@@ -1587,15 +1584,15 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           {/* Station 5: อาคาร 4/3 (OPD) */}
           <div className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200/80 hover:border-teal-300 transition-all flex flex-col justify-between">
             <div>
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-1">
                 <span className="font-extrabold text-slate-900 text-sm">อาคาร 4/3 (OPD)</span>
                 <span className="text-[10px] text-slate-400">ชั้น 3</span>
               </div>
-              <span className="text-xs text-slate-500 block mt-0.5">ผู้ป่วยนอก</span>
+              <span className="text-xs text-slate-500 block mt-0.5 leading-normal">ผู้ป่วยนอก</span>
             </div>
-            <div className="mt-3 pt-2 border-t border-slate-200/60 flex items-center justify-between">
+            <div className="mt-3 pt-2 border-t border-slate-200/60 flex flex-wrap items-center justify-between gap-1">
               <span className="text-[11px] text-slate-500 font-medium">แรงดัน:</span>
-              <span className={`text-xs px-2.5 py-0.5 rounded-lg border ${getStationBadge(latestRecord?.building4_3_opd).bg}`}>
+              <span className={`text-xs px-2.5 py-0.5 rounded-lg border leading-normal ${getStationBadge(latestRecord?.building4_3_opd).bg}`}>
                 {getStationBadge(latestRecord?.building4_3_opd).icon} {getStationBadge(latestRecord?.building4_3_opd).text}
               </span>
             </div>
@@ -1604,15 +1601,15 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           {/* Station 6: อาคาร 4/2 (ICU) */}
           <div className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200/80 hover:border-teal-300 transition-all flex flex-col justify-between">
             <div>
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-1">
                 <span className="font-extrabold text-slate-900 text-sm">อาคาร 4/2 (ICU)</span>
                 <span className="text-[10px] text-slate-400">ชั้น 2</span>
               </div>
-              <span className="text-xs text-slate-500 block mt-0.5">หอผู้ป่วยวิกฤต</span>
+              <span className="text-xs text-slate-500 block mt-0.5 leading-normal">หอผู้ป่วยวิกฤต</span>
             </div>
-            <div className="mt-3 pt-2 border-t border-slate-200/60 flex items-center justify-between">
+            <div className="mt-3 pt-2 border-t border-slate-200/60 flex flex-wrap items-center justify-between gap-1">
               <span className="text-[11px] text-slate-500 font-medium">แรงดัน:</span>
-              <span className={`text-xs px-2.5 py-0.5 rounded-lg border ${getStationBadge(latestRecord?.building4_2_icu).bg}`}>
+              <span className={`text-xs px-2.5 py-0.5 rounded-lg border leading-normal ${getStationBadge(latestRecord?.building4_2_icu).bg}`}>
                 {getStationBadge(latestRecord?.building4_2_icu).icon} {getStationBadge(latestRecord?.building4_2_icu).text}
               </span>
             </div>
@@ -1621,7 +1618,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           {/* Station 7: อาคาร 4/1 (ห้องเก็บอ๊อกซิเจนส่วนกลาง BME) - Highlighted */}
           <div className="col-span-1 sm:col-span-2 p-4 rounded-2xl bg-gradient-to-r from-teal-50 to-cyan-50 border border-teal-200 hover:border-teal-300 transition-all flex flex-col justify-between">
             <div>
-              <div className="flex items-center justify-between">
+              <div className="flex flex-wrap items-center justify-between gap-1">
                 <span className="font-extrabold text-teal-950 text-sm">
                   อาคาร 4/1 (ห้องเก็บอ๊อกซิเจนส่วนกลาง BME)
                 </span>
@@ -1629,11 +1626,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   คลังหลัก
                 </span>
               </div>
-              <span className="text-xs text-teal-700 block mt-0.5">
+              <span className="text-xs text-teal-700 block mt-0.5 leading-normal">
                 ศูนย์กลางจ่ายและจัดเก็บถังออกซิเจนสำรอง
               </span>
             </div>
-            <div className="mt-3 pt-2 border-t border-teal-200/60 flex items-center justify-between">
+            <div className="mt-3 pt-2 border-t border-teal-200/60 flex flex-wrap items-center justify-between gap-2">
               <span className="text-[11px] text-teal-800 font-semibold">สถานะแรงดัน / การจัดเก็บ:</span>
               <span className="text-xs px-3 py-1 rounded-lg border font-mono font-bold bg-white text-teal-900 border-teal-300 shadow-2xs">
                 {latestRecord?.building4_1_storage || '-'}

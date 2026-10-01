@@ -81,21 +81,21 @@ export const Navbar: React.FC<NavbarProps> = ({
               <span className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full"></span>
             </div>
             <div>
-              <div className="flex items-center space-x-2">
-                <span className="font-extrabold text-lg sm:text-xl bg-gradient-to-r from-slate-900 via-teal-950 to-slate-800 bg-clip-text text-transparent tracking-tight">
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                <span className="font-extrabold text-base sm:text-lg bg-gradient-to-r from-slate-900 via-teal-950 to-slate-800 bg-clip-text text-transparent tracking-tight leading-tight">
                   BME O<sub>2</sub> Monitor
                 </span>
-                <span className="text-[10px] px-2.5 py-0.5 font-bold bg-teal-50 text-teal-700 rounded-full border border-teal-200/60 shadow-xs">
+                <span className="text-[10px] px-2 py-0.5 font-bold bg-teal-50 text-teal-700 rounded-full border border-teal-200/60 shadow-xs leading-normal">
                   Pro Edition
                 </span>
                 {latestIsLowStock && (
-                  <span className="hidden sm:flex items-center space-x-1 text-[11px] px-2.5 py-0.5 font-bold bg-rose-50 text-rose-700 rounded-full border border-rose-200 animate-pulse">
-                    <AlertTriangle className="w-3 h-3 text-rose-600" />
+                  <span className="hidden sm:inline-flex items-center space-x-1 text-[11px] px-2.5 py-0.5 font-bold bg-rose-50 text-rose-700 rounded-full border border-rose-200 animate-pulse leading-normal">
+                    <AlertTriangle className="w-3 h-3 text-rose-600 shrink-0" />
                     <span>ต้องสั่งด่วน</span>
                   </span>
                 )}
               </div>
-              <p className="text-[11px] text-slate-500 font-medium">โรงพยาบาลเปาโล • แผนก BME & เวรรับส่งผู้ป่วย</p>
+              <p className="text-[11px] text-slate-500 font-medium leading-normal mt-0.5">โรงพยาบาลเปาโล • แผนก BME & เวรรับส่งผู้ป่วย</p>
             </div>
           </div>
 
