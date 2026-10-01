@@ -1,0 +1,6 @@
+{
+  "name": "BME Oxygen Tank Monitor & Daily Inspection System",
+  "description": "ระบบตรวจเช็คถังออกซิเจนประจำวัน BME พร้อมแจ้งเตือน Line Flex Card แดชบอร์ดสรุปรายวัน/เดือน/ปี จัดการข้อมูลพนักงาน และส่งออก Excel/PDF",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
