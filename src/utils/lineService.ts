@@ -28,7 +28,6 @@ export function createLineFlexMessage(record: InspectionRecord, settings: System
             color: '#FFFFFFCC',
             size: 'xxs',
             weight: 'bold',
-            letterSpacing: '2px',
           },
           {
             type: 'text',
@@ -281,7 +280,7 @@ export function createLineFlexMessage(record: InspectionRecord, settings: System
                 color: record.issues && record.issues !== 'พร้อมใช้งาน' && record.issues !== '-' ? '#D97706' : '#10B981',
                 wrap: true,
                 weight: 'bold',
-                margin: 'xxs',
+                margin: 'xs',
               },
             ],
           },

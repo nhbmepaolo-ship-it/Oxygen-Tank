@@ -164,7 +164,7 @@ app.post('/api/line/notify', async (req, res) => {
 
     for (const target of targets) {
       console.log(`[LINE] Pushing message to target: ${target}`);
-      const lineResp = await fetch('https://api.line.me/v2/bot/message/push', {
+      let lineResp = await fetch('https://api.line.me/v2/bot/message/push', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -176,21 +176,45 @@ app.post('/api/line/notify', async (req, res) => {
         }),
       });
 
-      const lineBody = await lineResp.text();
+      let lineBody = await lineResp.text();
       console.log(`[LINE Response] status=${lineResp.status}, body=${lineBody}`);
+
+      // Fallback: If Flex message was rejected by LINE, retry immediately with plain text
+      if (!lineResp.ok && messageToSend.type === 'flex') {
+        console.warn(`[LINE] Flex rejected (${lineResp.status}). Sending plain text fallback...`);
+        const fallbackText = `🏥 แจ้งเตือนตรวจเช็คออกซิเจน BME\n📅 วันที่: ${record?.date || '-'}\n👤 ผู้ตรวจ: ${record?.inspector || '-'}\n\n📊 สถานะถังออกซิเจน:\n• 📟 ดิจิตอลรุ่นใหม่: ${record?.readyDigitalTanks ?? 0} ถัง\n• 🎛️ หัวเกย์รุ่นเก่า: ${record?.readyGaugeTanks ?? 0} ถัง\n• 📦 รวมพร้อมใช้: ${record?.totalReadyTanks ?? 0} ถัง ${record?.isLowStock ? '🚨 (ต่ำกว่าเกณฑ์สั่งซื้อด่วน!)' : '✅ (ปกติ)'}\n\n📍 ปัญหาที่พบ: ${record?.issues || 'พร้อมใช้งาน'}`;
+        const retryResp = await fetch('https://api.line.me/v2/bot/message/push', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            to: target,
+            messages: [{ type: 'text', text: fallbackText }],
+          }),
+        });
+        lineBody = await retryResp.text();
+        if (retryResp.ok) {
+          lineResp = retryResp;
+          console.log(`[LINE] Fallback text push succeeded:`, lineBody);
+        }
+      }
 
       if (lineResp.ok) {
         try {
           const parsed = JSON.parse(lineBody);
-          sentMessageId = parsed.sentMessages?.[0]?.id || 'delivered';
+          sentMessageId = parsed.sentMessages?.[0]?.id || sentMessageId || 'delivered';
           lineStatus = 'delivered';
           lineDetails = parsed;
         } catch {
           lineStatus = 'delivered';
         }
       } else {
-        lineStatus = `error_${lineResp.status}`;
-        lineDetails = lineBody;
+        if (lineStatus !== 'delivered') {
+          lineStatus = `error_${lineResp.status}`;
+          lineDetails = lineBody;
+        }
       }
     }
   } catch (err: any) {

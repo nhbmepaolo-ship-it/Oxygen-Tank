@@ -14,9 +14,12 @@ import {
   Code,
   Copy,
   Calendar,
+  Bell,
+  Smartphone,
 } from 'lucide-react';
 import { downloadNewSheetTemplate } from '../utils/exportUtils';
 import { getNextEndOfMonth1630 } from '../utils/storage';
+import { sendLineAndWebhookNotifications } from '../utils/lineService';
 
 interface SettingsModalProps {
   settings: SystemSettings;
@@ -79,6 +82,58 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     } catch {
       setTestEmailStatus('ส่งรายงานเรียบร้อย (บันทึกคิวสำเร็จ)');
       setTimeout(() => setTestEmailStatus(null), 4000);
+    }
+  };
+
+  const [testLineStatus, setTestLineStatus] = useState<{ text: string; type: 'success' | 'error'; id?: string } | null>(null);
+  const [isTestingLine, setIsTestingLine] = useState(false);
+
+  const handleSendTestLine = async () => {
+    setIsTestingLine(true);
+    setTestLineStatus(null);
+    try {
+      const sampleRecord: InspectionRecord = records.length > 0 ? records[0] : {
+        id: 'test-rec',
+        timestamp: new Date().toLocaleString('th-TH'),
+        inspector: 'ผู้ทดสอบระบบ BME',
+        date: new Date().toLocaleDateString('th-TH'),
+        ward4_9: 'FULL',
+        ward4_8_ari: 'FULL',
+        building4_7_pt: '550',
+        ward4_6: 'FULL',
+        building4_3_opd: '450',
+        building4_2_icu: 'FULL',
+        building4_1_storage: '500',
+        readyDigitalTanks: 35,
+        readyGaugeTanks: 25,
+        totalReadyTanks: 60,
+        issues: 'ทดสอบส่งข้อความแจ้งเตือนระบบ BME Oxygen',
+        isLowStock: false,
+        createdAt: new Date().toISOString(),
+      };
+
+      const result = await sendLineAndWebhookNotifications(sampleRecord, formData);
+      if (result.success || result.lineStatus === 'delivered') {
+        setTestLineStatus({
+          text: `ส่งข้อความแจ้งเตือนเข้า LINE กลุ่มและเป้าหมายสำเร็จแล้ว! (Message ID: ${result.sentMessageId || 'DELIVERED'})`,
+          type: 'success',
+          id: result.sentMessageId,
+        });
+      } else {
+        setTestLineStatus({
+          text: `สถานะ: ${result.lineStatus} (${result.error || 'โปรดตรวจทาน Token หรือ Group ID'})`,
+          type: 'error',
+        });
+      }
+      setTimeout(() => setTestLineStatus(null), 8000);
+    } catch (err: any) {
+      setTestLineStatus({
+        text: `เกิดข้อผิดพลาดในการส่ง LINE: ${err.message}`,
+        type: 'error',
+      });
+      setTimeout(() => setTestLineStatus(null), 8000);
+    } finally {
+      setIsTestingLine(false);
     }
   };
 
@@ -380,7 +435,57 @@ function doPost(e) {
 
         {/* Section 4: LINE API Token & Group ID */}
         <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
-          <h3 className="font-bold text-slate-900 text-sm">LINE Messaging API Credentials</h3>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+            <div className="flex items-center space-x-2">
+              <span className="p-2 rounded-xl bg-emerald-50 text-emerald-600">
+                <Bell className="w-5 h-5" />
+              </span>
+              <div>
+                <h3 className="font-bold text-slate-900 text-sm">การเชื่อมต่อ LINE Messaging API (แจ้งเตือนเข้ากลุ่ม)</h3>
+                <p className="text-xs text-slate-500">
+                  ส่งข้อความการ์ดตรวจเช็คออกซิเจนและแจ้งเตือนวิกฤตเมื่อถังเหลือน้อยเข้า LINE กลุ่มโดยตรง
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              disabled={isTestingLine}
+              onClick={handleSendTestLine}
+              className={`px-4 py-2 rounded-xl font-bold text-xs transition-all flex items-center space-x-2 shrink-0 ${
+                isTestingLine
+                  ? 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                  : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs shadow-emerald-600/20 active:scale-95'
+              }`}
+            >
+              <Send className="w-3.5 h-3.5" />
+              <span>{isTestingLine ? 'กำลังส่งแจ้งเตือน...' : '🧪 ทดสอบส่ง LINE ทันที'}</span>
+            </button>
+          </div>
+
+          {/* Test LINE Result Alert */}
+          {testLineStatus && (
+            <div
+              className={`p-3.5 rounded-xl border text-xs flex items-center justify-between animate-in fade-in duration-200 ${
+                testLineStatus.type === 'success'
+                  ? 'bg-emerald-50 border-emerald-300 text-emerald-900 font-semibold'
+                  : 'bg-rose-50 border-rose-300 text-rose-900 font-semibold'
+              }`}
+            >
+              <div className="flex items-center space-x-2">
+                <span>{testLineStatus.type === 'success' ? '✅' : '❌'}</span>
+                <span>{testLineStatus.text}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setTestLineStatus(null)}
+                className="text-slate-400 hover:text-slate-600 font-bold ml-2 text-xs"
+              >
+                ✕
+              </button>
+            </div>
+          )}
+
           <div className="space-y-3">
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">
@@ -395,7 +500,7 @@ function doPost(e) {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Group ID</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Line Group ID</label>
                 <input
                   type="text"
                   value={formData.lineGroupId}
@@ -404,7 +509,7 @@ function doPost(e) {
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">User ID</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Line User ID (Admin/Tester)</label>
                 <input
                   type="text"
                   value={formData.lineUserId}

@@ -30,7 +30,13 @@ import {
   CalendarDays,
   UserCheck,
   RotateCcw,
+  Bell,
+  Send,
+  HelpCircle,
+  X,
+  ExternalLink,
 } from 'lucide-react';
+import { sendLineAndWebhookNotifications } from '../utils/lineService';
 
 interface DashboardViewProps {
   records: InspectionRecord[];
@@ -250,8 +256,109 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     return { text: `${val}`, icon: '🔵', bg: 'bg-teal-50 text-teal-900 border-teal-200 font-mono font-bold' };
   };
 
+  const [showGuideModal, setShowGuideModal] = useState(false);
+  const [isTestingLine, setIsTestingLine] = useState(false);
+  const [lineTestToast, setLineTestToast] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
+
+  const handleQuickLineTest = async () => {
+    if (!latestRecord) return;
+    setIsTestingLine(true);
+    setLineTestToast(null);
+    try {
+      const res = await sendLineAndWebhookNotifications(latestRecord, settings);
+      if (res.success || res.lineStatus === 'delivered') {
+        setLineTestToast({
+          text: `ส่งการ์ดตรวจเช็คเข้า LINE กลุ่มเรียบร้อยแล้ว! (Message ID: ${res.sentMessageId || 'DELIVERED'})`,
+          type: 'success',
+        });
+      } else {
+        setLineTestToast({
+          text: `แจ้งเตือน LINE: ${res.lineStatus} (${res.error || 'โปรดตรวจสอบการเชื่อมต่อ'})`,
+          type: 'error',
+        });
+      }
+      setTimeout(() => setLineTestToast(null), 6000);
+    } catch (err: any) {
+      setLineTestToast({
+        text: `ส่ง LINE ไม่สำเร็จ: ${err.message}`,
+        type: 'error',
+      });
+      setTimeout(() => setLineTestToast(null), 6000);
+    } finally {
+      setIsTestingLine(false);
+    }
+  };
+
   return (
     <div className="space-y-6 pb-16 text-slate-800">
+      {/* QUICK ACTIONS & EXPLAINER TOOLBAR */}
+      <div className="bg-gradient-to-r from-slate-900 via-teal-950 to-slate-900 rounded-3xl p-4 sm:p-5 text-white shadow-lg flex flex-col md:flex-row md:items-center justify-between gap-4 border border-teal-800/30">
+        <div className="flex items-center space-x-3">
+          <div className="w-10 h-10 rounded-2xl bg-teal-500/20 border border-teal-400/30 flex items-center justify-center text-xl shrink-0">
+            💡
+          </div>
+          <div>
+            <h2 className="text-sm sm:text-base font-bold text-white flex items-center space-x-2">
+              <span>ศูนย์รวมสต็อกออกซิเจน BME: แบบไหนเหลือเท่าไหร่?</span>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-teal-400/20 text-teal-300 font-mono border border-teal-400/30">
+                Live Status
+              </span>
+            </h2>
+            <p className="text-xs text-slate-300 mt-0.5">
+              แยกตาม 3 หมวด: ถังดิจิตอลรุ่นใหม่ (LCD), ถังหัวเกย์รุ่นเก่า (เข็ม), และแรงดันท่อส่งก๊าซ 7 จุดตรวจ
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center flex-wrap gap-2.5 shrink-0">
+          <button
+            type="button"
+            onClick={() => setShowGuideModal(true)}
+            className="px-3.5 py-2 bg-teal-500 hover:bg-teal-400 text-slate-950 rounded-xl text-xs font-black shadow-md shadow-teal-500/20 transition-all flex items-center space-x-1.5 active:scale-95 cursor-pointer"
+          >
+            <HelpCircle className="w-4 h-4" />
+            <span>วิธีดูว่าแบบไหนเหลือเท่าไหร่</span>
+          </button>
+
+          <button
+            type="button"
+            disabled={isTestingLine || !latestRecord}
+            onClick={handleQuickLineTest}
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 ${
+              isTestingLine
+                ? 'bg-slate-700 text-slate-400 cursor-not-allowed'
+                : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-md shadow-emerald-600/30 active:scale-95 cursor-pointer'
+            }`}
+          >
+            <Bell className="w-4 h-4" />
+            <span>{isTestingLine ? 'กำลังส่งแจ้งเตือน...' : '📲 ทดสอบส่ง LINE กลุ่ม'}</span>
+          </button>
+        </div>
+      </div>
+
+      {/* LINE TEST FEEDBACK TOAST */}
+      {lineTestToast && (
+        <div
+          className={`p-4 rounded-2xl border text-xs sm:text-sm font-semibold flex items-center justify-between shadow-md animate-in fade-in zoom-in-95 duration-200 ${
+            lineTestToast.type === 'success'
+              ? 'bg-emerald-50 border-emerald-300 text-emerald-950'
+              : 'bg-rose-50 border-rose-300 text-rose-950'
+          }`}
+        >
+          <div className="flex items-center space-x-2.5">
+            <span className="text-lg">{lineTestToast.type === 'success' ? '✅' : '❌'}</span>
+            <span>{lineTestToast.text}</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setLineTestToast(null)}
+            className="text-slate-400 hover:text-slate-700 font-bold ml-3 text-xs"
+          >
+            ✕ ปิด
+          </button>
+        </div>
+      )}
+
       {/* DATA RESCUE BANNER IF RECORDS ARE EMPTY */}
       {records.length === 0 && (
         <div className="p-4 bg-amber-500 text-white rounded-2xl flex items-center justify-between shadow-lg">
@@ -518,6 +625,168 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 width: `${Math.min(100, Math.max(10, ((latestRecord?.totalReadyTanks ?? 0) / 80) * 100))}%`,
               }}
             />
+          </div>
+        </div>
+      </div>
+
+      {/* 2.5 DETAILED INVENTORY BREAKDOWN BY TANK TYPE */}
+      <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/80 shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+          <div className="flex items-center space-x-2.5">
+            <span className="p-2 rounded-xl bg-teal-50 text-teal-600 font-bold text-lg">
+              🔍
+            </span>
+            <div>
+              <h3 className="text-sm sm:text-base font-bold text-slate-900 flex items-center space-x-2">
+                <span>สรุปเจาะลึก: แบบไหนเหลือเท่าไหร่ & สังเกตอย่างไร?</span>
+              </h3>
+              <p className="text-xs text-slate-500">
+                แยกวิเคราะห์ระหว่างถังดิจิตอล, ถังหัวเกย์, และแรงดันท่อส่งก๊าซส่วนกลาง 7 จุด
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setShowGuideModal(true)}
+            className="text-xs font-bold text-teal-700 hover:text-teal-800 bg-teal-50 hover:bg-teal-100 border border-teal-200 px-3 py-1.5 rounded-xl transition-colors flex items-center space-x-1.5 self-start sm:self-auto cursor-pointer"
+          >
+            <HelpCircle className="w-3.5 h-3.5" />
+            <span>อ่านคำแนะนำจำแนกถัง</span>
+          </button>
+        </div>
+
+        {/* 4 Comparative Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+          {/* Item 1: Digital */}
+          <div className="p-4 rounded-2xl bg-teal-50/50 border border-teal-200/80 flex flex-col justify-between space-y-3">
+            <div>
+              <div className="flex items-center justify-between">
+                <span className="font-extrabold text-teal-900 flex items-center space-x-1.5">
+                  <span className="text-base">📟</span>
+                  <span>ถังดิจิตอลรุ่นใหม่</span>
+                </span>
+                <span
+                  className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                    (latestRecord?.readyDigitalTanks ?? 0) < settings.digitalLowThreshold
+                      ? 'bg-rose-100 text-rose-700'
+                      : 'bg-teal-100 text-teal-800'
+                  }`}
+                >
+                  {(latestRecord?.readyDigitalTanks ?? 0) < settings.digitalLowThreshold ? '🚨 สั่งซื้อ' : '✅ ปกติ'}
+                </span>
+              </div>
+              <div className="mt-3 flex items-baseline space-x-1.5">
+                <span className="text-3xl font-black text-teal-900">
+                  {latestRecord?.readyDigitalTanks ?? 0}
+                </span>
+                <span className="text-teal-700 font-bold">ถังพร้อมใช้</span>
+              </div>
+              <p className="text-[11px] text-slate-600 mt-2 leading-relaxed">
+                <strong>วิธีดู:</strong> มีหน้าจอ LCD ดิจิตอล แสดงตัวเลข Bar/PSI ชัดเจน
+              </p>
+            </div>
+            <div className="pt-2 border-t border-teal-200/60 text-[11px] text-slate-500 flex items-center justify-between">
+              <span>เกณฑ์สั่งซื้อ:</span>
+              <strong className="text-teal-900">&lt; {settings.digitalLowThreshold} ถัง</strong>
+            </div>
+          </div>
+
+          {/* Item 2: Gauge */}
+          <div className="p-4 rounded-2xl bg-indigo-50/50 border border-indigo-200/80 flex flex-col justify-between space-y-3">
+            <div>
+              <div className="flex items-center justify-between">
+                <span className="font-extrabold text-indigo-900 flex items-center space-x-1.5">
+                  <span className="text-base">🎛️</span>
+                  <span>ถังหัวเกย์รุ่นเก่า</span>
+                </span>
+                <span
+                  className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                    (latestRecord?.readyGaugeTanks ?? 0) < settings.gaugeLowThreshold
+                      ? 'bg-amber-100 text-amber-800'
+                      : 'bg-indigo-100 text-indigo-800'
+                  }`}
+                >
+                  {(latestRecord?.readyGaugeTanks ?? 0) < settings.gaugeLowThreshold ? '⚠️ สต็อกน้อย' : '✅ พร้อมใช้'}
+                </span>
+              </div>
+              <div className="mt-3 flex items-baseline space-x-1.5">
+                <span className="text-3xl font-black text-indigo-900">
+                  {latestRecord?.readyGaugeTanks ?? 0}
+                </span>
+                <span className="text-indigo-700 font-bold">ถังพร้อมใช้</span>
+              </div>
+              <p className="text-[11px] text-slate-600 mt-2 leading-relaxed">
+                <strong>วิธีดู:</strong> หน้าปัดเกจเข็มหมุนอนาล็อก (Needle Gauge)
+              </p>
+            </div>
+            <div className="pt-2 border-t border-indigo-200/60 text-[11px] text-slate-500 flex items-center justify-between">
+              <span>เกณฑ์สำรอง:</span>
+              <strong className="text-indigo-900">&gt;= {settings.gaugeLowThreshold} ถัง</strong>
+            </div>
+          </div>
+
+          {/* Item 3: Total */}
+          <div className="p-4 rounded-2xl bg-cyan-50/50 border border-cyan-200/80 flex flex-col justify-between space-y-3">
+            <div>
+              <div className="flex items-center justify-between">
+                <span className="font-extrabold text-cyan-900 flex items-center space-x-1.5">
+                  <span className="text-base">📦</span>
+                  <span>รวมพร้อมใช้ทั้งหมด</span>
+                </span>
+                <span
+                  className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                    (latestRecord?.totalReadyTanks ?? 0) < settings.totalLowThreshold
+                      ? 'bg-rose-100 text-rose-700 font-black'
+                      : 'bg-emerald-100 text-emerald-800'
+                  }`}
+                >
+                  {(latestRecord?.totalReadyTanks ?? 0) < settings.totalLowThreshold ? '🚨 สั่งด่วน' : '🛡️ ปลอดภัย'}
+                </span>
+              </div>
+              <div className="mt-3 flex items-baseline space-x-1.5">
+                <span className="text-3xl font-black text-cyan-900">
+                  {latestRecord?.totalReadyTanks ?? 0}
+                </span>
+                <span className="text-cyan-700 font-bold">ถังรวมสุทธิ</span>
+              </div>
+              <p className="text-[11px] text-slate-600 mt-2 leading-relaxed">
+                <strong>สูตรคำนวณ:</strong> ดิจิตอล ({latestRecord?.readyDigitalTanks ?? 0}) + หัวเกย์ ({latestRecord?.readyGaugeTanks ?? 0})
+              </p>
+            </div>
+            <div className="pt-2 border-t border-cyan-200/60 text-[11px] text-slate-500 flex items-center justify-between">
+              <span>เกณฑ์วิกฤต:</span>
+              <strong className="text-rose-700 font-black">&lt; {settings.totalLowThreshold} ถัง</strong>
+            </div>
+          </div>
+
+          {/* Item 4: Ward Pipeline Stations */}
+          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 flex flex-col justify-between space-y-3">
+            <div>
+              <div className="flex items-center justify-between">
+                <span className="font-extrabold text-slate-900 flex items-center space-x-1.5">
+                  <span className="text-base">🏥</span>
+                  <span>ท่อส่งก๊าซ 7 จุดตรวจ</span>
+                </span>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-200 text-slate-700">
+                  ระบบไปป์ไลน์
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-500 mt-1">
+                ระบบท่อก๊าซกลางติดผนัง (ไม่ใช่ถังเคลื่อนย้าย)
+              </p>
+              <div className="mt-2.5 grid grid-cols-2 gap-1 text-[10px] font-mono">
+                <div className="p-1 rounded bg-white border border-slate-200">W4/9: <strong>{latestRecord?.ward4_9 || '-'}</strong></div>
+                <div className="p-1 rounded bg-white border border-slate-200">ARI: <strong>{latestRecord?.ward4_8_ari || '-'}</strong></div>
+                <div className="p-1 rounded bg-white border border-slate-200">PT: <strong>{latestRecord?.building4_7_pt || '-'}</strong></div>
+                <div className="p-1 rounded bg-white border border-slate-200">W4/6: <strong>{latestRecord?.ward4_6 || '-'}</strong></div>
+                <div className="p-1 rounded bg-white border border-slate-200">OPD: <strong>{latestRecord?.building4_3_opd || '-'}</strong></div>
+                <div className="p-1 rounded bg-white border border-slate-200">ICU: <strong>{latestRecord?.building4_2_icu || '-'}</strong></div>
+              </div>
+            </div>
+            <div className="pt-2 border-t border-slate-200 text-[10px] text-slate-500">
+              ห้องเก็บ 4/1: <strong className="text-teal-900">{latestRecord?.building4_1_storage || '-'}</strong>
+            </div>
           </div>
         </div>
       </div>
@@ -1497,6 +1766,144 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           )}
         </div>
       </div>
+
+      {/* 4. MODAL: GUIDE ON TANK TYPES & INVENTORY BREAKDOWN */}
+      {showGuideModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-xs overflow-y-auto animate-in fade-in duration-150">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-slate-200 my-8">
+            {/* Modal Header */}
+            <div className="bg-gradient-to-r from-teal-700 via-teal-800 to-slate-900 text-white p-6 sticky top-0 z-10 flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center text-xl shrink-0">
+                  💡
+                </div>
+                <div>
+                  <h3 className="text-base sm:text-lg font-bold text-white">
+                    คู่มือจำแนกประเภทถัง: จะรู้ได้อย่างไรว่าแบบไหนเหลือเท่าไหร่?
+                  </h3>
+                  <p className="text-xs text-teal-200 mt-0.5">
+                    ทำความเข้าใจความแตกต่างของถังแต่ละแบบ เกณฑ์สั่งซื้อ และจุดตรวจประจำวอร์ด
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowGuideModal(false)}
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors shrink-0 cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 space-y-6 text-slate-700 text-xs sm:text-sm">
+              {/* Question & Quick Answer */}
+              <div className="p-4 bg-teal-50 border border-teal-200 rounded-2xl">
+                <h4 className="font-extrabold text-teal-950 text-sm flex items-center space-x-2">
+                  <span>❓ คำถาม: "งงมาก จะรู้ได้อย่างไรว่าแบบไหนเหลือเท่าไหร่?"</span>
+                </h4>
+                <p className="text-teal-900 mt-1.5 leading-relaxed text-xs">
+                  ระบบ BME แบ่งออกซิเจนออกเป็น <strong>3 หมวดหลัก</strong> เพื่อให้ตรวจนับและสั่งซื้อได้ตรงเป้าหมาย:
+                </p>
+              </div>
+
+              {/* 3 Categories Breakdown */}
+              <div className="space-y-4">
+                {/* 1. Digital */}
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-black text-slate-900 flex items-center space-x-2 text-sm">
+                      <span className="text-xl">📟</span>
+                      <span>1. ถังดิจิตอลรุ่นใหม่ (Digital Oxygen Tank)</span>
+                    </span>
+                    <span className="px-2.5 py-1 rounded-full bg-teal-100 text-teal-800 font-bold text-xs">
+                      คงเหลือ: {latestRecord?.readyDigitalTanks ?? 0} ถัง
+                    </span>
+                  </div>
+                  <ul className="list-disc list-inside space-y-1 text-slate-600 text-xs ml-1">
+                    <li><strong>วิธีสังเกตหัวถัง:</strong> มีหน้าปัดดิจิตอล LCD ตัวเลขสีฟ้าหรือดำ แสดงแรงดันชัดเจน อ่านค่าง่ายแม่นยำ</li>
+                    <li><strong>การใช้งาน:</strong> เหมาะสำหรับรถเข็นส่งต่อผู้ป่วยฉุกเฉิน, รถพยาบาล, หรือย้ายผู้ป่วยข้ามตึก</li>
+                    <li><strong>เกณฑ์ความปลอดภัย:</strong> ต้องมีสำรองอย่างน้อย <strong>{settings.digitalLowThreshold} ถังขึ้นไป</strong> หากเหลือน้อยกว่านี้ ระบบจะแจ้งเตือนวิกฤตสั่งซื้อด่วนทันที</li>
+                  </ul>
+                </div>
+
+                {/* 2. Gauge */}
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-black text-slate-900 flex items-center space-x-2 text-sm">
+                      <span className="text-xl">🎛️</span>
+                      <span>2. ถังหัวเกย์รุ่นเก่า (Standard Gauge Tank)</span>
+                    </span>
+                    <span className="px-2.5 py-1 rounded-full bg-indigo-100 text-indigo-800 font-bold text-xs">
+                      คงเหลือ: {latestRecord?.readyGaugeTanks ?? 0} ถัง
+                    </span>
+                  </div>
+                  <ul className="list-disc list-inside space-y-1 text-slate-600 text-xs ml-1">
+                    <li><strong>วิธีสังเกตหัวถัง:</strong> มีหน้าปัดกลไกเข็มหมุนแบบอนาล็อก (Needle Dial Gauge) ต้องดูตำแหน่งเข็มชี้</li>
+                    <li><strong>การใช้งาน:</strong> สำรองใช้งานประจำเตียงผู้ป่วยในหอผู้ป่วยทั่วไป (Ward) และเป็นสต็อกสำรองในห้องเก็บ</li>
+                    <li><strong>เกณฑ์สำรอง:</strong> ควรมีคงเหลืออย่างน้อย <strong>{settings.gaugeLowThreshold} ถังขึ้นไป</strong></li>
+                  </ul>
+                </div>
+
+                {/* 3. Total */}
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-black text-slate-900 flex items-center space-x-2 text-sm">
+                      <span className="text-xl">📦</span>
+                      <span>3. รวมพร้อมใช้ทั้งหมด (Total Available)</span>
+                    </span>
+                    <span className="px-2.5 py-1 rounded-full bg-cyan-100 text-cyan-800 font-black text-xs">
+                      รวม: {latestRecord?.totalReadyTanks ?? 0} ถัง
+                    </span>
+                  </div>
+                  <ul className="list-disc list-inside space-y-1 text-slate-600 text-xs ml-1">
+                    <li><strong>สูตรคำนวณ:</strong> ถังดิจิตอล ({latestRecord?.readyDigitalTanks ?? 0}) + ถังหัวเกย์ ({latestRecord?.readyGaugeTanks ?? 0}) = <strong>{latestRecord?.totalReadyTanks ?? 0} ถัง</strong></li>
+                    <li><strong>เกณฑ์วิกฤตสั่งซื้อฉุกเฉิน:</strong> หากยอดรวมต่ำกว่า <strong>{settings.totalLowThreshold} ถัง</strong> เจ้าหน้าที่ต้องทำเรื่องสั่งซื้อก๊าซเข้าเติมสต็อกทันที</li>
+                  </ul>
+                </div>
+
+                {/* 4. Pipeline Stations */}
+                <div className="p-4 rounded-2xl bg-amber-50/60 border border-amber-200 space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-xl">🏥</span>
+                    <span className="font-black text-amber-950 text-sm">
+                      4. แล้วจุดตรวจ Ward 4/9, 4/8, 4/7, 4/6, OPD, ICU, 4/1 คืออะไร?
+                    </span>
+                  </div>
+                  <p className="text-xs text-amber-900 leading-relaxed">
+                    จุดเหล่านี้ <strong>ไม่ใช่ถังออกซิเจนเคลื่อนย้าย</strong> แต่เป็น <strong>บอร์ดเกจวัดแรงดันท่อส่งจ่ายก๊าซส่วนกลางติดผนัง</strong> ในแต่ละตึกและชั้น:
+                  </p>
+                  <ul className="list-disc list-inside space-y-1 text-amber-900 text-xs ml-1">
+                    <li>ถ้าขึ้นว่า <strong>FULL</strong> = แรงดันในท่อจ่ายเต็ม 100% ปลอดภัย</li>
+                    <li>ถ้าขึ้นเป็น <strong>ตัวเลข (เช่น 450, 500, 550)</strong> = ค่าแรงดันปกติของสถานีนั้นๆ (หน่วย kPa หรือ PSI)</li>
+                  </ul>
+                </div>
+              </div>
+
+              {/* Where to view */}
+              <div className="p-4 bg-slate-100 rounded-2xl space-y-2">
+                <h5 className="font-bold text-slate-900 text-xs">📱 วิธีเช็คสต็อกได้ทุกวันแบบง่ายๆ:</h5>
+                <ol className="list-decimal list-inside space-y-1 text-xs text-slate-600">
+                  <li><strong>ดูการ์ด 3 ช่องด้านบน:</strong> แสดงตัวเลขดิจิตอล หัวเกย์ และรวมสุทธิแบบชัดเจน</li>
+                  <li><strong>ดูจากข้อความใน LINE กลุ่ม:</strong> ทุกครั้งที่ตรวจเช็คเสร็จ ระบบจะส่งการ์ดแจ้งเตือนแยกยอดถังดิจิตอล/หัวเกย์ให้ทุกคนในกลุ่มทันที</li>
+                  <li><strong>ดูจากแท็บ "บันทึกการตรวจเช็ค":</strong> มีตารางประวัติเรียงวันล่าสุดก่อน และมีคอลัมน์แยกทั้งดิจิตอลและหัวเกย์ครบถ้วน</li>
+                </ol>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-4 bg-slate-50 border-t border-slate-200 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setShowGuideModal(false)}
+                className="px-6 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl font-bold text-xs shadow-md transition-all cursor-pointer"
+              >
+                เข้าใจแล้ว ปิดหน้าต่าง
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

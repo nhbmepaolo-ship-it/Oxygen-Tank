@@ -129,12 +129,19 @@ export const InspectionFormModal: React.FC<InspectionFormModalProps> = ({
 
     // Send notifications if enabled
     if (sendLine) {
-      setSubmissionStatus('กำลังส่ง LINE Flex Card & Webhook...');
+      setSubmissionStatus('กำลังส่ง LINE Flex Card เข้ากลุ่ม...');
       try {
-        await sendLineAndWebhookNotifications(newRecord, settings);
-      } catch (err) {
+        const lineResult = await sendLineAndWebhookNotifications(newRecord, settings);
+        if (lineResult.success || lineResult.lineStatus === 'delivered') {
+          setSubmissionStatus('✅ ส่งเข้า LINE กลุ่มสำเร็จเรียบร้อย!');
+        } else {
+          setSubmissionStatus(`บันทึกแล้ว (LINE: ${lineResult.lineStatus})`);
+        }
+      } catch (err: any) {
         console.warn('Line notification dispatched with notice:', err);
+        setSubmissionStatus('บันทึกเรียบร้อย');
       }
+      await new Promise((resolve) => setTimeout(resolve, 1200));
     }
 
     setIsSubmitting(false);
