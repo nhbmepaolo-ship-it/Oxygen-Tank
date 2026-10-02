@@ -197,13 +197,24 @@ export const Navbar: React.FC<NavbarProps> = ({
                 title={!isGuest ? 'คลิกเพื่อแก้ไขข้อมูลส่วนตัว' : 'คลิกเพื่อเข้าสู่ระบบ'}
               >
                 <div
-                  className={`w-9 h-9 rounded-xl flex items-center justify-center text-xs font-black text-white shadow-xs ${
+                  className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-center px-1 text-white shadow-xs shrink-0 select-none leading-tight border border-white/50 ${
                     !isGuest
-                      ? 'bg-gradient-to-tr from-teal-600 to-cyan-500'
+                      ? 'bg-gradient-to-tr from-teal-600 to-cyan-500 shadow-teal-500/20'
                       : 'bg-slate-300 text-slate-700'
+                  } ${
+                    currentUser.nickname && currentUser.nickname.length > 3
+                      ? 'text-[10px]'
+                      : 'text-xs'
                   }`}
+                  title={!isGuest ? `ผู้ใช้: ${currentUser.name} (${currentUser.nickname || '-'})` : 'เข้าสู่ระบบ'}
                 >
-                  {!isGuest ? currentUser.nickname?.charAt(0) || 'U' : <Lock className="w-4 h-4 text-slate-600" />}
+                  {!isGuest ? (
+                    <span className="truncate max-w-full block text-center">
+                      {currentUser.nickname || currentUser.name.slice(0, 2)}
+                    </span>
+                  ) : (
+                    <Lock className="w-4 h-4 text-slate-600" />
+                  )}
                 </div>
                 <div className="hidden lg:block text-left text-xs">
                   <div className="font-bold text-slate-800 group-hover:text-teal-700 transition-colors flex items-center space-x-1">

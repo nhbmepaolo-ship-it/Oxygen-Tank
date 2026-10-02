@@ -301,15 +301,24 @@ export const EmployeeManagement: React.FC<EmployeeManagementProps> = ({
               <div className="flex items-start justify-between">
                 <div className="flex items-center space-x-3">
                   <div
-                    className={`w-11 h-11 rounded-xl flex items-center justify-center font-bold text-sm shadow-xs ${
+                    className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-center px-1 shadow-xs shrink-0 leading-tight transition-transform hover:scale-105 select-none ${
                       emp.status === 'resigned'
-                        ? 'bg-rose-100 text-rose-700'
+                        ? 'bg-rose-100 text-rose-700 border border-rose-200'
                         : isHead
-                        ? 'bg-gradient-to-tr from-amber-500 to-amber-600 text-white'
-                        : 'bg-gradient-to-tr from-teal-500 to-cyan-600 text-white'
+                        ? 'bg-gradient-to-tr from-amber-500 via-amber-600 to-yellow-600 text-white border-2 border-amber-200/50 shadow-amber-500/20'
+                        : 'bg-gradient-to-tr from-teal-500 via-teal-600 to-cyan-600 text-white border-2 border-teal-200/50 shadow-teal-500/20'
+                    } ${
+                      (emp.nickname || emp.name).length <= 2
+                        ? 'text-sm'
+                        : (emp.nickname || emp.name).length <= 4
+                        ? 'text-xs'
+                        : 'text-[11px] tracking-tight'
                     }`}
+                    title={`ชื่อเล่น: ${emp.nickname || emp.name}`}
                   >
-                    {emp.nickname ? emp.nickname.slice(0, 2) : emp.name.slice(0, 1)}
+                    <span className="truncate max-w-full block text-center">
+                      {emp.nickname || emp.name}
+                    </span>
                   </div>
                   <div>
                     <div className="flex items-center space-x-1.5">
